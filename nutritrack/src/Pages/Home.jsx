@@ -10,9 +10,7 @@ function Home() {
       <HeroSection />
       <FeaturesSection />
       <AboutSection />
-      <div className="my-5">
-        <TransButton text="Comenzar Mi Transformación" onClick={() => {}} />
-      </div>
+
     </main>
   );
 }

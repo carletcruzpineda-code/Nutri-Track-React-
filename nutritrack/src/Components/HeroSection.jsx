@@ -14,7 +14,7 @@ export default function HeroSection() {
           Transforma tu alimentación y estilo de vida con herramientas personalizadas.
         </p>
         <div className="mt-3">
-          <TransButton text="Comenzar" onClick={() => navigate("/register")} />
+          <TransButton text="Comenzar mi Transformación" onClick={() => navigate("/register")} />
         </div>
       </Container>
     </section>

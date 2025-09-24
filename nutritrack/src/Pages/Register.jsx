@@ -1,54 +1,167 @@
 import React, { useState } from "react";
-import { Container, Form, Button, Alert, Card } from "react-bootstrap";
+import { Container, Form, Button, Alert, Card, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../Components/UserContext";
 
+
 function Register() {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    edad: "",
+    email: "",
+    password: "",
+    peso: "",
+    altura: "",
+    genero: "",
+    condiciones: [],
+    alergias: []
+  });
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
   const { login } = useUser();
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    // Si son checkboxes, guardamos en array
+    if (type === "checkbox") {
+      if (checked) {
+        setFormData({
+          ...formData,
+          [name]: [...formData[name], value]
+        });
+      } else {
+        setFormData({
+          ...formData,
+          [name]: formData[name].filter((item) => item !== value)
+        });
+      }
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password || !name) {
-      setError("Por favor llena todos los campos");
+
+    const { name, edad, email, password } = formData;
+
+    if (!name || !edad || !email || !password) {
+      setError("Por favor llena los campos obligatorios");
       return;
     }
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    if (users.find((user) => user.email === email)) {
+
+    const usuarios = await getUsuarios();
+    if (usuarios.find((u) => u.email === email)) {
       setError("Este correo ya está registrado");
       return;
     }
-    const newUser = { email, name, password };
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
+
+    await agregarUsuario(formData);
     login(email);
     navigate("/dashboard");
   };
 
   return (
     <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
-      <Card className="p-4 shadow-sm" style={{ maxWidth: "420px", width: "100%" }}>
-        <h2 className="text-success text-center mb-4">Crear cuenta</h2>
+      <Card className="p-4 shadow-sm" style={{ maxWidth: "500px", width: "100%" }}>
+        <h2 className="text-success text-center mb-3">Crear Cuenta</h2>
+        <p className="text-center text-muted">Completa tu información para personalizar tu experiencia</p>
+
         {error && <Alert variant="danger">{error}</Alert>}
+
         <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3" controlId="registerName">
-            <Form.Label>Nombre completo</Form.Label>
-            <Form.Control type="text" placeholder="Tu nombre" value={name} onChange={(e) => setName(e.target.value)} required />
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Nombre</Form.Label>
+                <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} required />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Edad</Form.Label>
+                <Form.Control type="number" name="edad" value={formData.edad} onChange={handleChange} required />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Email</Form.Label>
+            <Form.Control type="email" name="email" value={formData.email} onChange={handleChange} required />
           </Form.Group>
-          <Form.Group className="mb-3" controlId="registerEmail">
-            <Form.Label>Correo electrónico</Form.Label>
-            <Form.Control type="email" placeholder="correo@ejemplo.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="registerPassword">
+
+          <Form.Group className="mb-3">
             <Form.Label>Contraseña</Form.Label>
-            <Form.Control type="password" placeholder="********" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            <Form.Control type="password" name="password" value={formData.password} onChange={handleChange} required minLength={6} />
           </Form.Group>
-          <Button variant="success" type="submit" className="w-100">Registrarse</Button>
+
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Peso (kg)</Form.Label>
+                <Form.Control type="number" name="peso" value={formData.peso} onChange={handleChange} />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Altura (cm)</Form.Label>
+                <Form.Control type="number" name="altura" value={formData.altura} onChange={handleChange} />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Género</Form.Label>
+            <Form.Select name="genero" value={formData.genero} onChange={handleChange}>
+              <option value="">Selecciona tu género</option>
+              <option value="Hombre">Hombre</option>
+              <option value="Mujer">Mujer</option>
+              <option value="Otro">Otro</option>
+            </Form.Select>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Condiciones Médicas (opcional)</Form.Label>
+            <div>
+              {["Diabetes", "Hipertensión", "Hipotiroidismo", "Celiaquía"].map((cond) => (
+                <Form.Check
+                  key={cond}
+                  type="checkbox"
+                  label={cond}
+                  name="condiciones"
+                  value={cond}
+                  checked={formData.condiciones.includes(cond)}
+                  onChange={handleChange}
+                />
+              ))}
+            </div>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Alergias Alimentarias (opcional)</Form.Label>
+            <div>
+              {["Gluten", "Lactosa", "Nueces", "Mariscos"].map((alergia) => (
+                <Form.Check
+                  key={alergia}
+                  type="checkbox"
+                  label={alergia}
+                  name="alergias"
+                  value={alergia}
+                  checked={formData.alergias.includes(alergia)}
+                  onChange={handleChange}
+                />
+              ))}
+            </div>
+          </Form.Group>
+
+          <Button variant="success" type="submit" className="w-100">
+            Crear Cuenta
+          </Button>
         </Form>
       </Card>
     </Container>
