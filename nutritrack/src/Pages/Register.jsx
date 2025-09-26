@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Form, Button, Alert, Card, Row, Col } from "react-bootstrap";
+import { Container, Form, Button, Alert, Card, Row, Col, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../Components/UserContext";
 import { getUsuarios, agregarUsuario } from "../Services/UserService";
@@ -17,13 +17,13 @@ function Register() {
     alergias: []
   });
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useUser();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     if (type === "checkbox") {
       setFormData((prev) => ({
         ...prev,
@@ -41,25 +41,42 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { name, edad, email, password } = formData;
+    setError(null);
+    setLoading(true);
 
+    const { name, edad, email, password } = formData;
     if (!name || !edad || !email || !password) {
-      setError("Por favor llena los campos obligatorios");
+      setError("Por favor llena los campos obligatorios.");
+      setLoading(false);
       return;
     }
 
     try {
       const usuarios = await getUsuarios();
-      if (usuarios.find((u) => u.email === email)) {
-        setError("Este correo ya está registrado");
+
+      if (!usuarios || !Array.isArray(usuarios)) {
+        throw new Error("No se pudo obtener la lista de usuarios.");
+      }
+
+      const yaExiste = usuarios.find((u) => u.email.toLowerCase() === email.toLowerCase());
+      if (yaExiste) {
+        setError("Este correo ya está registrado.");
+        setLoading(false);
         return;
       }
 
       const nuevoUsuario = await agregarUsuario(formData);
-      login(nuevoUsuario); // Guardamos todo el objeto usuario
+      if (!nuevoUsuario || !nuevoUsuario.id) {
+        throw new Error("Error al registrar el usuario.");
+      }
+
+      login(nuevoUsuario); // Guardar en contexto
       navigate("/dashboard");
     } catch (err) {
-      setError("Error al registrar usuario");
+      console.error("Error al registrar usuario:", err);
+      setError("Error al registrar usuario. Intenta más tarde.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,9 +84,7 @@ function Register() {
     <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
       <Card className="p-4 shadow-sm" style={{ maxWidth: "500px", width: "100%" }}>
         <h2 className="text-success text-center mb-3">Crear Cuenta</h2>
-        <p className="text-center text-muted">
-          Completa tu información para personalizar tu experiencia
-        </p>
+        <p className="text-center text-muted">Completa tu información para personalizar tu experiencia</p>
 
         {error && <Alert variant="danger">{error}</Alert>}
 
@@ -151,11 +166,7 @@ function Register() {
 
           <Form.Group className="mb-3">
             <Form.Label>Género</Form.Label>
-            <Form.Select
-              name="genero"
-              value={formData.genero}
-              onChange={handleChange}
-            >
+            <Form.Select name="genero" value={formData.genero} onChange={handleChange}>
               <option value="">Selecciona tu género</option>
               <option value="Hombre">Hombre</option>
               <option value="Mujer">Mujer</option>
@@ -166,19 +177,17 @@ function Register() {
           <Form.Group className="mb-3">
             <Form.Label>Condiciones Médicas (opcional)</Form.Label>
             <div>
-              {["Diabetes", "Hipertensión", "Hipotiroidismo", "Celiaquía"].map(
-                (cond) => (
-                  <Form.Check
-                    key={cond}
-                    type="checkbox"
-                    label={cond}
-                    name="condiciones"
-                    value={cond}
-                    checked={formData.condiciones.includes(cond)}
-                    onChange={handleChange}
-                  />
-                )
-              )}
+              {["Diabetes", "Hipertensión", "Hipotiroidismo", "Celiaquía"].map((cond) => (
+                <Form.Check
+                  key={cond}
+                  type="checkbox"
+                  label={cond}
+                  name="condiciones"
+                  value={cond}
+                  checked={formData.condiciones.includes(cond)}
+                  onChange={handleChange}
+                />
+              ))}
             </div>
           </Form.Group>
 
@@ -199,8 +208,8 @@ function Register() {
             </div>
           </Form.Group>
 
-          <Button variant="success" type="submit" className="w-100">
-            Crear Cuenta
+          <Button variant="success" type="submit" className="w-100" disabled={loading}>
+            {loading ? <Spinner animation="border" size="sm" /> : "Crear Cuenta"}
           </Button>
         </Form>
       </Card>

@@ -1,0 +1,29 @@
+.dashboard-wrapper {
+  min-height: 100vh;
+  background-color: #f8fdf8;
+  padding: 1.5rem;
+}
+
+/* Estilos responsive para pantallas pequeñas (≤576px) */
+@media (max-width: 576px) {
+  .dashboard-wrapper {
+    padding: 1rem;
+  }
+
+  /* Los botones se apilan en columna para mejor usabilidad móvil */
+  .dashboard-wrapper .btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Mejora: solo aplica margen a todos excepto el último */
+  .dashboard-wrapper .btn:not(:last-child) {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Centra el contenido alineado originalmente a la derecha */
+  .dashboard-wrapper .text-end {
+    text-align: center;
+  }
+}

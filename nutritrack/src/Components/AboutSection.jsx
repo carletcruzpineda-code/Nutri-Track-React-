@@ -1,13 +1,13 @@
 import React from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
-import { BookOpen, Target, Eye } from "lucide-react"; // Íconos modernos
+import { BookOpen, Target, Eye } from "lucide-react";
+import "../Styles/AboutSection.css"; // ✅ Importa tu CSS
 
 function AboutSection() {
   return (
-    <section id="about" className="py-5" style={{ backgroundColor: "#f0fdf4" }}>
+    <section id="about" className="about-section py-5">
       <Container>
         <Row className="g-4">
-          {/* Card 1 */}
           <Col xs={12} md={6} lg={4}>
             <Card className="h-100 border-0 shadow-sm text-center p-4">
               <div
@@ -23,15 +23,11 @@ function AboutSection() {
               </div>
               <h5 className="fw-bold">Acerca de Nosotros</h5>
               <p className="text-muted">
-                NutriTrack nace de la pasión por democratizar el acceso a una
-                alimentación saludable. Somos un equipo dedicado a crear herramientas
-                digitales que simplifican el seguimiento nutricional y empoderan a las
-                personas para tomar decisiones alimentarias informadas.
+                NutriTrack nace de la pasión por democratizar el acceso a una alimentación saludable...
               </p>
             </Card>
           </Col>
 
-          {/* Card 2 */}
           <Col xs={12} md={6} lg={4}>
             <Card className="h-100 border-0 shadow-sm text-center p-4">
               <div
@@ -47,15 +43,11 @@ function AboutSection() {
               </div>
               <h5 className="fw-bold">Nuestra Misión</h5>
               <p className="text-muted">
-                Facilitar el acceso a herramientas de nutrición intuitivas y confiables
-                que permitan a cada persona construir hábitos alimentarios sostenibles,
-                mejorando su calidad de vida a través de decisiones nutricionales
-                conscientes e informadas.
+                Facilitar el acceso a herramientas de nutrición intuitivas y confiables...
               </p>
             </Card>
           </Col>
 
-          {/* Card 3 */}
           <Col xs={12} md={6} lg={4}>
             <Card className="h-100 border-0 shadow-sm text-center p-4">
               <div
@@ -71,30 +63,12 @@ function AboutSection() {
               </div>
               <h5 className="fw-bold">Nuestra Visión</h5>
               <p className="text-muted">
-                Convertirnos en la plataforma digital de referencia para el seguimiento
-                nutricional, creando una comunidad global donde la alimentación saludable
-                sea accesible, comprensible y parte natural del estilo de vida de cada
-                persona.
+                Convertirnos en la plataforma digital de referencia para el seguimiento nutricional...
               </p>
             </Card>
           </Col>
         </Row>
       </Container>
-
-      {/* Ajustes responsivos extras */}
-      <style jsx>{`
-        @media (max-width: 576px) {
-          h5 {
-            font-size: 1.1rem;
-          }
-          p {
-            font-size: 0.9rem;
-          }
-          .card {
-            padding: 1.5rem !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }

@@ -8,30 +8,43 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useUser();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     try {
       const usuarios = await getUsuario(email, password);
+
       if (usuarios.length > 0) {
-        login(usuarios[0]); // Pasamos todo el objeto usuario
+        login(usuarios[0]);
         navigate("/dashboard");
       } else {
-        setError("Correo o contraseña incorrectos");
+        setError("Correo o contraseña incorrectos.");
       }
     } catch (err) {
-      setError("Error al conectar con la base de datos");
+      console.error("Login error:", err);
+      setError("Error al conectar con el servidor. Intenta nuevamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
+    <Container
+      className="d-flex align-items-center justify-content-center"
+      style={{ minHeight: "100vh" }}
+    >
       <Card className="p-4 shadow-sm" style={{ maxWidth: "420px", width: "100%" }}>
         <h2 className="text-success text-center mb-4">Iniciar sesión</h2>
+
         {error && <Alert variant="danger">{error}</Alert>}
+
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3" controlId="loginEmail">
             <Form.Label>Correo electrónico</Form.Label>
@@ -43,6 +56,7 @@ function Login() {
               required
             />
           </Form.Group>
+
           <Form.Group className="mb-3" controlId="loginPassword">
             <Form.Label>Contraseña</Form.Label>
             <Form.Control
@@ -51,11 +65,12 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={4}
             />
           </Form.Group>
-          <Button variant="success" type="submit" className="w-100">
-            Iniciar sesión
+
+          <Button variant="success" type="submit" className="w-100" disabled={loading}>
+            {loading ? "Cargando..." : "Iniciar sesión"}
           </Button>
         </Form>
       </Card>
