@@ -9,8 +9,12 @@
       "peso": 72,
       "altura": 175,
       "genero": "Hombre",
-      "condiciones": ["Hipertensión"],
-      "alergias": ["Gluten"]
+      "condiciones": [
+        "Hipertensión"
+      ],
+      "alergias": [
+        "Gluten"
+      ]
     },
     {
       "id": "2",
@@ -21,8 +25,12 @@
       "peso": 60,
       "altura": 162,
       "genero": "Mujer",
-      "condiciones": ["Diabetes"],
-      "alergias": ["Lactosa"]
+      "condiciones": [
+        "Diabetes"
+      ],
+      "alergias": [
+        "Lactosa"
+      ]
     },
     {
       "id": "3",
@@ -33,8 +41,13 @@
       "peso": 80,
       "altura": 178,
       "genero": "Hombre",
-      "condiciones": ["Hipotiroidismo"],
-      "alergias": ["Nueces", "Mariscos"]
+      "condiciones": [
+        "Hipotiroidismo"
+      ],
+      "alergias": [
+        "Nueces",
+        "Mariscos"
+      ]
     },
     {
       "id": "4",
@@ -57,170 +70,13 @@
       "peso": 68,
       "altura": 172,
       "genero": "Hombre",
-      "condiciones": ["Celiaquía"],
-      "alergias": ["Gluten"]
+      "condiciones": [
+        "Celiaquía"
+      ],
+      "alergias": [
+        "Gluten"
+      ]
     }
   ],
-  "foods": [
-    {
-      "id": "1",
-      "name": "Manzana",
-      "calories": 52,
-      "protein": 0.3,
-      "carbs": 14,
-      "fat": 0.2
-    },
-    {
-      "id": "2",
-      "name": "Pechuga de Pollo",
-      "calories": 165,
-      "protein": 31,
-      "carbs": 0,
-      "fat": 3.6
-    },
-    {
-      "id": "3",
-      "name": "Arroz Blanco",
-      "calories": 130,
-      "protein": 2.4,
-      "carbs": 28,
-      "fat": 0.3
-    },
-    {
-      "id": "4",
-      "name": "Banana",
-      "calories": 89,
-      "protein": 1.1,
-      "carbs": 23,
-      "fat": 0.3
-    },
-    {
-      "id": "5",
-      "name": "Huevo",
-      "calories": 155,
-      "protein": 13,
-      "carbs": 1.1,
-      "fat": 11
-    },
-    {
-      "id": "6",
-      "name": "Pan Integral",
-      "calories": 247,
-      "protein": 13,
-      "carbs": 41,
-      "fat": 4.2
-    },
-    {
-      "id": "7",
-      "name": "Avena",
-      "calories": 389,
-      "protein": 16.9,
-      "carbs": 66,
-      "fat": 6.9
-    },
-    {
-      "id": "8",
-      "name": "Leche Descremada (100ml)",
-      "calories": 42,
-      "protein": 3.4,
-      "carbs": 5,
-      "fat": 0.1
-    },
-    {
-      "id": "9",
-      "name": "Yogur Natural",
-      "calories": 59,
-      "protein": 10,
-      "carbs": 3.6,
-      "fat": 0.4
-    },
-    {
-      "id": "10",
-      "name": "Salmón",
-      "calories": 208,
-      "protein": 20,
-      "carbs": 0,
-      "fat": 13
-    },
-    {
-      "id": "11",
-      "name": "Brócoli",
-      "calories": 55,
-      "protein": 3.7,
-      "carbs": 11,
-      "fat": 0.6
-    },
-    {
-      "id": "12",
-      "name": "Zanahoria",
-      "calories": 41,
-      "protein": 0.9,
-      "carbs": 10,
-      "fat": 0.2
-    },
-    {
-      "id": "13",
-      "name": "Papa Hervida",
-      "calories": 87,
-      "protein": 2,
-      "carbs": 20,
-      "fat": 0.1
-    },
-    {
-      "id": "14",
-      "name": "Tomate",
-      "calories": 18,
-      "protein": 0.9,
-      "carbs": 3.9,
-      "fat": 0.2
-    },
-    {
-      "id": "15",
-      "name": "Queso Fresco",
-      "calories": 96,
-      "protein": 11,
-      "carbs": 2,
-      "fat": 5
-    },
-    {
-      "id": "16",
-      "name": "Lentejas",
-      "calories": 116,
-      "protein": 9,
-      "carbs": 20,
-      "fat": 0.4
-    },
-    {
-      "id": "17",
-      "name": "Almendras",
-      "calories": 576,
-      "protein": 21,
-      "carbs": 22,
-      "fat": 49
-    },
-    {
-      "id": "18",
-      "name": "Aceite de Oliva (10ml)",
-      "calories": 88,
-      "protein": 0,
-      "carbs": 0,
-      "fat": 10
-    },
-    {
-      "id": "19",
-      "name": "Pasta Cocida",
-      "calories": 131,
-      "protein": 5,
-      "carbs": 25,
-      "fat": 1.1
-    },
-    {
-      "id": "20",
-      "name": "Atún en Agua",
-      "calories": 132,
-      "protein": 28,
-      "carbs": 0,
-      "fat": 1
-    }
-  ]
+  "foods": []
 }

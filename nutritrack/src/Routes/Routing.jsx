@@ -1,6 +1,8 @@
 // src/Routes/Routing.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AddMeal from "../Pages/AddMeal";
+
 
 import Home from "../Pages/Home";
 import Register from "../Pages/Register";
@@ -17,6 +19,7 @@ function Routing() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        
 
         {/* Rutas protegidas */}
         <Route
@@ -24,6 +27,14 @@ function Routing() {
           element={
             <PrivateRoute>
               <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/add-meal"
+          element={
+            <PrivateRoute>
+              <AddMeal />
             </PrivateRoute>
           }
         />
