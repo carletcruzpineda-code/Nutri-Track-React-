@@ -39,6 +39,7 @@ h1, h2, h3 {
   text-decoration: none;
   transition: all 0.3s ease;
 }
+
 .btn-main:hover {
   background-color: #218838;
   transform: translateY(-2px);
@@ -48,9 +49,10 @@ h1, h2, h3 {
   border-radius: 1rem;
   border: none;
   background: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease, border 0.2s ease;
 }
+
 .card:hover {
   transform: translateY(-4px);
   border: 1px solid #28a745;
@@ -73,6 +75,7 @@ footer a {
   color: #d4f8d4;
   text-decoration: none;
 }
+
 footer a:hover {
   text-decoration: underline;
 }

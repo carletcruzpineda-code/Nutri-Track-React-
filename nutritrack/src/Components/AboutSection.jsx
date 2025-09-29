@@ -1,7 +1,7 @@
 import React from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { BookOpen, Target, Eye } from "lucide-react";
-import "../Styles/AboutSection.css"; // ✅ Importa tu CSS
+import "../Styles/AboutSection.css"; 
 
 function AboutSection() {
   return (

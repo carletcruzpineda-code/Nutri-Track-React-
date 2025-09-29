@@ -70,7 +70,7 @@ function Register() {
         throw new Error("Error al registrar el usuario.");
       }
 
-      login(nuevoUsuario); // Guardar en contexto
+      login(nuevoUsuario); // Guardo en contexto
       navigate("/dashboard");
     } catch (err) {
       console.error("Error al registrar usuario:", err);

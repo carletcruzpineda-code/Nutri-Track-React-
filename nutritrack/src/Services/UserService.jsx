@@ -1,4 +1,4 @@
-// src/Services/UserService.js
+
 
 export async function getUsuarios() {
   try {
@@ -30,7 +30,7 @@ export async function agregarUsuario(data) {
   }
 }
 
-// NUEVA FUNCIÓN para login: obtener usuario por email y password
+//  FUNCIÓN para login: obtener usuario por email y password
 export async function getUsuario(email, password) {
   try {
     const response = await fetch(
@@ -39,7 +39,7 @@ export async function getUsuario(email, password) {
     if (!response.ok) {
       throw new Error("Error en la petición de login");
     }
-    return await response.json(); // devuelve array con usuario(s)
+    return await response.json(); // devuelve array con usuario
   } catch (error) {
     console.error("Error al obtener usuario:", error);
     throw error;

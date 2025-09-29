@@ -7,10 +7,10 @@ export const useUser = () => useContext(UserContext);
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  // Guarda el objeto usuario completo
+  // Guardo el objeto usuario completo
   const login = (userData) => setUser(userData);
 
-  // Limpia el usuario
+  // Limpio el usuario
   const logout = () => setUser(null);
 
   return (

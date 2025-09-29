@@ -1,4 +1,4 @@
-// src/Routes/Routing.jsx
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AddMeal from "../Pages/AddMeal";
@@ -39,7 +39,7 @@ function Routing() {
           }
         />
 
-        {/* Opción: ruta catch-all 404 */}
+        {/*  ruta catch-all 404 */}
         <Route path="*" element={<h2>Página no encontrada</h2>} />
       </Routes>
     </Router>

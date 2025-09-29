@@ -1,6 +1,6 @@
-// src/Services/FoodService.js
 
-/* Obtener todos los alimentos */
+
+/* Obtengo todos los alimentos */
 export async function getFoods() {
   try {
     const response = await fetch("http://localhost:3001/foods", {
@@ -17,7 +17,7 @@ export async function getFoods() {
   }
 }
 
-/* Obtener alimento por id */
+/* Obtengo alimento por id */
 export async function getFoodById(id) {
   try {
     const response = await fetch(`http://localhost:3001/foods/${id}`, {
@@ -34,7 +34,7 @@ export async function getFoodById(id) {
   }
 }
 
-/* Agregar nuevo alimento */
+/* Agrego nuevo alimento */
 export async function agregarFood(foodObj) {
   try {
     const response = await fetch("http://localhost:3001/foods", {
@@ -52,7 +52,7 @@ export async function agregarFood(foodObj) {
   }
 }
 
-/* Actualizar alimento */
+/* Actualizo alimento */
 export async function actualizarFood(foodObj) {
   try {
     const response = await fetch(`http://localhost:3001/foods/${foodObj.id}`, {
@@ -70,7 +70,7 @@ export async function actualizarFood(foodObj) {
   }
 }
 
-/* Eliminar alimento por id */
+/* Elimino alimento por id */
 export async function eliminarFood(id) {
   try {
     const response = await fetch(`http://localhost:3001/foods/${id}`, {

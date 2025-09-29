@@ -1,4 +1,4 @@
-// src/Pages/AddMeal.jsx
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -61,7 +61,7 @@ function AddMeal() {
     setError(null);
 
     try {
-      // Guardar la comida seleccionada como nueva entrada en "foods"
+      // Guardo la comida seleccionada como nueva entrada en "foods"
       await agregarFood(selectedFood);
       navigate("/dashboard");
     } catch (err) {
