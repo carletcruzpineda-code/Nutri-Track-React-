@@ -1,6 +1,4 @@
-/* src/Styles/AboutSection.css */
 
-/* Estilos específicos para la sección "Sobre nosotros" en pantallas pequeñas */
 @media (max-width: 576px) {
   .about-section h5 {
     font-size: 1.1rem;

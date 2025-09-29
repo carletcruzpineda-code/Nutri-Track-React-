@@ -7,7 +7,7 @@ function Header() {
   const { user, logout } = useUser();
 
   return (
-    <Navbar bg="light" expand="lg" fixed="top" className="shadow-sm">
+    <Navbar bg="light" expand="lg"  className="shadow-sm">
       <Container>
         <Navbar.Brand as={Link} to="/" className="text-success fw-bold">
           🌱 NutriTrack

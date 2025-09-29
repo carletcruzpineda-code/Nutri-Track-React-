@@ -78,46 +78,5 @@
       ]
     }
   ],
-  "foods": [
-    {
-      "id": "11",
-      "name": "Brócoli",
-      "calories": 55,
-      "protein": 3.7,
-      "carbs": 11,
-      "fat": 0.6
-    },
-    {
-      "id": "12",
-      "name": "Zanahoria",
-      "calories": 41,
-      "protein": 0.9,
-      "carbs": 10,
-      "fat": 0.2
-    },
-    {
-      "id": "16",
-      "name": "Lentejas",
-      "calories": 116,
-      "protein": 9,
-      "carbs": 20,
-      "fat": 0.4
-    },
-    {
-      "id": "18",
-      "name": "Aceite de Oliva (10ml)",
-      "calories": 88,
-      "protein": 0,
-      "carbs": 0,
-      "fat": 10
-    },
-    {
-      "id": "20",
-      "name": "Atún en Agua",
-      "calories": 132,
-      "protein": 28,
-      "carbs": 0,
-      "fat": 1
-    }
-  ]
+  "foods": []
 }
