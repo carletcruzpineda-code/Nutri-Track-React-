@@ -1,5 +1,3 @@
-
-
 /* Obtengo todos los alimentos */
 export async function getFoods() {
   try {

@@ -1,13 +1,12 @@
-
+/* src/Routes/Routing.jsx */
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AddMeal from "../Pages/AddMeal";
-
-
 import Home from "../Pages/Home";
 import Register from "../Pages/Register";
 import Login from "../Pages/Login";
 import Dashboard from "../Pages/DashBoard";
+import AdminPanel from "../Pages/AdminPanel";
 import PrivateRoute from "./PrivateRoutes";
 import Header from "../Components/Header";
 
@@ -19,7 +18,6 @@ function Routing() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        
 
         {/* Rutas protegidas */}
         <Route
@@ -39,7 +37,17 @@ function Routing() {
           }
         />
 
-        {/*  ruta catch-all 404 */}
+        {/* Admin route */}
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <AdminPanel />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ruta catch-all 404 */}
         <Route path="*" element={<h2>Página no encontrada</h2>} />
       </Routes>
     </Router>

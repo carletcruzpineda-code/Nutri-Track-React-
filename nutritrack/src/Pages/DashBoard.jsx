@@ -1,4 +1,4 @@
-
+/* src/Pages/DashBoard.jsx */
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../Components/UserContext";
@@ -13,42 +13,61 @@ import {
   Modal,
   Form
 } from "react-bootstrap";
-import {
-  getFoods,
-  eliminarFood,
-  actualizarFood
-} from "../Services/FoodServices";
 import "../Styles/DashBoard.css";
+import {
+  getConsumidosByUser,
+  eliminarConsumido,
+  actualizarConsumido
+} from "../Services/ConsumidosService";
+import { getFoods } from "../Services/FoodServices";
 
 function Dashboard() {
   const { user, logout } = useUser();
   const navigate = useNavigate();
 
-  const [foods, setFoods] = useState([]);
+  const [consumidos, setConsumidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Estado para edición
+  // Estado para edición de consumido
   const [showModal, setShowModal] = useState(false);
-  const [editFood, setEditFood] = useState(null);
+  const [editConsumido, setEditConsumido] = useState(null);
+  const [foods, setFoods] = useState([]);
 
   useEffect(() => {
     if (!user) {
       navigate("/login");
       return;
     }
-    fetchFoods();
+    // si es admin, llevar al panel admin
+    if (user.tipoUsuario === "Admin") {
+      navigate("/admin");
+      return;
+    }
+    fetchConsumidos();
+    fetchFoodsCatalog();
+    // eslint-disable-next-line
   }, [user, navigate]);
 
-  const fetchFoods = async () => {
+  const fetchConsumidos = async () => {
+    setLoading(true);
     try {
-      const data = await getFoods();
-      setFoods(data);
+      const data = await getConsumidosByUser(user.id);
+      setConsumidos(data || []);
     } catch (err) {
-      console.error("Error cargando foods:", err);
-      setError("No se pudo cargar la información nutricional.");
+      console.error("Error cargando consumidos:", err);
+      setError("No se pudo cargar tus consumos.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFoodsCatalog = async () => {
+    try {
+      const f = await getFoods();
+      setFoods(f || []);
+    } catch (err) {
+      console.error("Error cargando catálogo de foods:", err);
     }
   };
 
@@ -61,32 +80,31 @@ function Dashboard() {
     navigate("/add-meal");
   };
 
-  // Editar comida
-  const handleEdit = (food) => {
-    setEditFood({ ...food });
+  const handleEdit = (cons) => {
+    setEditConsumido({ ...cons }); // cons contains nested food object
     setShowModal(true);
   };
 
   const handleSaveEdit = async () => {
     try {
-      await actualizarFood(editFood);
+      // En el caso que se haya modificado la comida completa, aseguramos estructura
+      await actualizarConsumido(editConsumido);
       setShowModal(false);
-      fetchFoods();
+      fetchConsumidos();
     } catch (err) {
-      console.error("Error al actualizar:", err);
-      setError("No se pudo actualizar la comida.");
+      console.error("Error al actualizar consumido:", err);
+      setError("No se pudo actualizar el registro.");
     }
   };
 
-  // Elimino comida
   const handleDelete = async (id) => {
-    if (!window.confirm("¿Seguro que quieres eliminar esta comida?")) return;
+    if (!window.confirm("¿Seguro que quieres eliminar este registro de consumo?")) return;
     try {
-      await eliminarFood(id);
-      fetchFoods();
+      await eliminarConsumido(id);
+      fetchConsumidos();
     } catch (err) {
-      console.error("Error al eliminar:", err);
-      setError("No se pudo eliminar la comida.");
+      console.error("Error al eliminar consumido:", err);
+      setError("No se pudo eliminar el registro.");
     }
   };
 
@@ -102,13 +120,14 @@ function Dashboard() {
     return user.email || "Usuario";
   };
 
-  // Totales
-  const totals = foods.reduce(
-    (acc, food) => {
-      acc.calories += food.calories || 0;
-      acc.protein += food.protein || 0;
-      acc.carbs += food.carbs || 0;
-      acc.fat += food.fat || 0;
+  // Totales a partir de consumidos
+  const totals = consumidos.reduce(
+    (acc, c) => {
+      const f = c.food || {};
+      acc.calories += Number(f.calories || 0);
+      acc.protein += Number(f.protein || 0);
+      acc.carbs += Number(f.carbs || 0);
+      acc.fat += Number(f.fat || 0);
       return acc;
     },
     { calories: 0, protein: 0, carbs: 0, fat: 0 }
@@ -151,92 +170,71 @@ function Dashboard() {
               <Col>
                 <h6>🔥 Calorías</h6>
                 <p className="fs-4 text-danger">{totals.calories}</p>
-                <small>calorías consumidas hoy</small>
+                <small>calorías consumidas</small>
               </Col>
               <Col>
                 <h6>💪 Proteínas</h6>
                 <p className="fs-4 text-warning">{totals.protein} g</p>
-                <small>gramos consumidos hoy</small>
+                <small>gramos consumidos</small>
               </Col>
               <Col>
                 <h6>🌾 Carbohidratos</h6>
                 <p className="fs-4 text-success">{totals.carbs} g</p>
-                <small>gramos consumidos hoy</small>
+                <small>gramos consumidos</small>
               </Col>
               <Col>
                 <h6>🥑 Grasas</h6>
                 <p className="fs-4 text-info">{totals.fat} g</p>
-                <small>gramos consumidos hoy</small>
+                <small>gramos consumidos</small>
               </Col>
             </Row>
           </Card>
 
-          {/* Lista de comidas */}
-          {foods.length === 0 ? (
+          {/* Lista de consumidos */}
+          {consumidos.length === 0 ? (
             <Card className="p-5 text-center shadow-sm">
-              <p className="text-muted mb-3">🍽️ No hay comidas registradas</p>
-              <p className="mb-4">
-                ¡Empieza agregando tu primera comida del día!
-              </p>
-              <Button variant="success" onClick={handleAddMeal}>
-                + Agregar Primera Comida
-              </Button>
+              <p className="text-muted mb-3">🍽️ No has registrado comidas</p>
+              <p className="mb-4">¡Empieza agregando tu primera comida del día!</p>
+              <Button variant="success" onClick={handleAddMeal}>+ Agregar Comida</Button>
             </Card>
           ) : (
             <Card className="p-4 shadow-sm">
-              <h5 className="mb-3">Comidas registradas</h5>
-              {foods.map((food) => (
-                <Row
-                  key={food.id}
-                  className="py-2 border-bottom align-items-center"
-                >
-                  <Col md={3} className="fw-bold">
-                    {food.name}
-                  </Col>
-                  <Col md={2}>{food.calories} cal</Col>
-                  <Col md={2}>{food.protein} g prot</Col>
-                  <Col md={2}>{food.carbs} g carb</Col>
-                  <Col md={2}>{food.fat} g grasa</Col>
-                  <Col md={1} className="text-end">
-                    <Button
-                      size="sm"
-                      variant="outline-warning"
-                      className="me-2"
-                      onClick={() => handleEdit(food)}
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      onClick={() => handleDelete(food.id)}
-                    >
-                      Eliminar
-                    </Button>
-                  </Col>
-                </Row>
-              ))}
+              <h5 className="mb-3">Tus consumos</h5>
+              {consumidos.map((c) => {
+                const f = c.food || {};
+                return (
+                  <Row key={c.id} className="py-2 border-bottom align-items-center">
+                    <Col md={3} className="fw-bold">{f.name}</Col>
+                    <Col md={2}>{Number(f.calories || 0)} cal</Col>
+                    <Col md={2}>{Number(f.protein || 0)} g prot</Col>
+                    <Col md={2}>{Number(f.carbs || 0)} g carb</Col>
+                    <Col md={2}>{Number(f.fat || 0)} g grasa</Col>
+                    <Col md={1} className="text-end">
+                      <Button size="sm" variant="outline-warning" className="me-2" onClick={() => handleEdit(c)}>Editar</Button>
+                      <Button size="sm" variant="outline-danger" onClick={() => handleDelete(c.id)}>Eliminar</Button>
+                    </Col>
+                  </Row>
+                );
+              })}
             </Card>
           )}
         </>
       )}
 
-      {/* Modal de edición */}
+      {/* Modal de edición de consumido */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Editar Comida</Modal.Title>
+          <Modal.Title>Editar registro de consumo</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {editFood && (
+          {editConsumido && (
             <Form>
               <Form.Group className="mb-3">
                 <Form.Label>Nombre</Form.Label>
                 <Form.Control
                   type="text"
-                  value={editFood.name}
-                  onChange={(e) =>
-                    setEditFood({ ...editFood, name: e.target.value })
-                  }
+                  value={editConsumido.food?.name || ""}
+                  onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), name: e.target.value } })}
                 />
               </Form.Group>
               <Row>
@@ -245,13 +243,8 @@ function Dashboard() {
                     <Form.Label>Calorías</Form.Label>
                     <Form.Control
                       type="number"
-                      value={editFood.calories}
-                      onChange={(e) =>
-                        setEditFood({
-                          ...editFood,
-                          calories: Number(e.target.value)
-                        })
-                      }
+                      value={editConsumido.food?.calories || 0}
+                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), calories: Number(e.target.value) } })}
                     />
                   </Form.Group>
                 </Col>
@@ -260,13 +253,8 @@ function Dashboard() {
                     <Form.Label>Proteínas (g)</Form.Label>
                     <Form.Control
                       type="number"
-                      value={editFood.protein}
-                      onChange={(e) =>
-                        setEditFood({
-                          ...editFood,
-                          protein: Number(e.target.value)
-                        })
-                      }
+                      value={editConsumido.food?.protein || 0}
+                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), protein: Number(e.target.value) } })}
                     />
                   </Form.Group>
                 </Col>
@@ -277,13 +265,8 @@ function Dashboard() {
                     <Form.Label>Carbohidratos (g)</Form.Label>
                     <Form.Control
                       type="number"
-                      value={editFood.carbs}
-                      onChange={(e) =>
-                        setEditFood({
-                          ...editFood,
-                          carbs: Number(e.target.value)
-                        })
-                      }
+                      value={editConsumido.food?.carbs || 0}
+                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), carbs: Number(e.target.value) } })}
                     />
                   </Form.Group>
                 </Col>
@@ -292,13 +275,8 @@ function Dashboard() {
                     <Form.Label>Grasas (g)</Form.Label>
                     <Form.Control
                       type="number"
-                      value={editFood.fat}
-                      onChange={(e) =>
-                        setEditFood({
-                          ...editFood,
-                          fat: Number(e.target.value)
-                        })
-                      }
+                      value={editConsumido.food?.fat || 0}
+                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), fat: Number(e.target.value) } })}
                     />
                   </Form.Group>
                 </Col>
@@ -307,12 +285,8 @@ function Dashboard() {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancelar
-          </Button>
-          <Button variant="success" onClick={handleSaveEdit}>
-            Guardar cambios
-          </Button>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
+          <Button variant="success" onClick={handleSaveEdit}>Guardar cambios</Button>
         </Modal.Footer>
       </Modal>
     </Container>
@@ -320,3 +294,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
+

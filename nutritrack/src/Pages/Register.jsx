@@ -1,3 +1,4 @@
+/* src/Pages/Register.jsx */
 import React, { useState } from "react";
 import { Container, Form, Button, Alert, Card, Row, Col, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -65,7 +66,13 @@ function Register() {
         return;
       }
 
-      const nuevoUsuario = await agregarUsuario(formData);
+      // aseguramos tipoUsuario = "Normal" por defecto
+      const nuevoUsuarioPayload = {
+        ...formData,
+        tipoUsuario: "Normal"
+      };
+
+      const nuevoUsuario = await agregarUsuario(nuevoUsuarioPayload);
       if (!nuevoUsuario || !nuevoUsuario.id) {
         throw new Error("Error al registrar el usuario.");
       }

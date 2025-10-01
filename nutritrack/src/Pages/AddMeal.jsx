@@ -1,4 +1,4 @@
-
+/* src/Pages/AddMeal.jsx */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,7 +9,9 @@ import {
   Alert,
   Spinner
 } from "react-bootstrap";
-import { getFoods, agregarFood, getFoodById } from "../Services/FoodServices";
+import { getFoods, getFoodById } from "../Services/FoodServices";
+import { agregarConsumido } from "../Services/ConsumidosService";
+import { useUser } from "../Components/UserContext";
 
 function AddMeal() {
   const [foods, setFoods] = useState([]);
@@ -19,6 +21,7 @@ function AddMeal() {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchFoods = async () => {
@@ -57,16 +60,27 @@ function AddMeal() {
       return;
     }
 
+    if (!user || !user.id) {
+      setError("Necesitas iniciar sesión.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      // Guardo la comida seleccionada como nueva entrada en "foods"
-      await agregarFood(selectedFood);
+      // construyo objeto consumido - guardo el food dentro para simplificar lecturas
+      const consumido = {
+        userId: user.id,
+        foodId: selectedFood.id,
+        food: selectedFood,
+        date: new Date().toISOString()
+      };
+      await agregarConsumido(consumido);
       navigate("/dashboard");
     } catch (err) {
-      console.error("Error al agregar comida:", err);
-      setError("No se pudo agregar la comida. Intenta de nuevo.");
+      console.error("Error al agregar consumido:", err);
+      setError("No se pudo registrar la comida. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }

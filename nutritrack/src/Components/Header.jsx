@@ -1,3 +1,4 @@
+/* src/Components/Header.jsx */
 import React from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -7,7 +8,7 @@ function Header() {
   const { user, logout } = useUser();
 
   return (
-    <Navbar bg="light" expand="lg"  className="shadow-sm">
+    <Navbar bg="light" expand="lg" className="shadow-sm">
       <Container>
         <Navbar.Brand as={Link} to="/" className="text-success fw-bold">
           🌱 NutriTrack
@@ -22,7 +23,11 @@ function Header() {
               </>
             ) : (
               <>
-                <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
+                {user.tipoUsuario === "Admin" ? (
+                  <Nav.Link as={Link} to="/admin">Admin</Nav.Link>
+                ) : (
+                  <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
+                )}
                 <Nav.Link onClick={logout} style={{ cursor: "pointer" }}>
                   Cerrar sesión
                 </Nav.Link>

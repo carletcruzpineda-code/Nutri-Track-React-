@@ -1,3 +1,4 @@
+/* src/Pages/Login.jsx */
 import React, { useState } from "react";
 import { Container, Form, Button, Alert, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -22,8 +23,15 @@ function Login() {
       const usuarios = await getUsuario(email, password);
 
       if (usuarios.length > 0) {
-        login(usuarios[0]);
-        navigate("/dashboard");
+        const usuario = usuarios[0];
+        login(usuario);
+
+        // dirigir segun tipoUsuario
+        if (usuario.tipoUsuario === "Admin") {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         setError("Correo o contraseña incorrectos.");
       }
