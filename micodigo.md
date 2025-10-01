@@ -1,4 +1,4 @@
-C:\Nutri-Track-React-\nutritrack\src\Components
+C:\Users\Estudiantes\Desktop\nutritrack\src\Components\AboutSection.jsx
 import React from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { BookOpen, Target, Eye } from "lucide-react";
@@ -76,7 +76,7 @@ function AboutSection() {
 
 export default AboutSection;
 
-C:\Nutri-Track-React-\nutritrack\src\Components\FeaturesSection.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Components\FeaturesSection.jsx
 import React from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 
@@ -110,7 +110,7 @@ function FeaturesSection() {
 
 export default FeaturesSection;
 
-C:\Nutri-Track-React-\nutritrack\src\Components\Footer.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Components\Footer.jsx
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import {
@@ -180,7 +180,8 @@ function Footer() {
 
 export default Footer;
 
-C:\Nutri-Track-React-\nutritrack\src\Components\Header.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Components\Header.jsx
+
 import React from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -190,7 +191,7 @@ function Header() {
   const { user, logout } = useUser();
 
   return (
-    <Navbar bg="light" expand="lg"  className="shadow-sm">
+    <Navbar bg="light" expand="lg" className="shadow-sm">
       <Container>
         <Navbar.Brand as={Link} to="/" className="text-success fw-bold">
           🌱 NutriTrack
@@ -205,7 +206,11 @@ function Header() {
               </>
             ) : (
               <>
-                <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
+                {user.tipoUsuario === "Admin" ? (
+                  <Nav.Link as={Link} to="/admin">Admin</Nav.Link>
+                ) : (
+                  <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
+                )}
                 <Nav.Link onClick={logout} style={{ cursor: "pointer" }}>
                   Cerrar sesión
                 </Nav.Link>
@@ -220,7 +225,7 @@ function Header() {
 
 export default Header;
 
-C:\Nutri-Track-React-\nutritrack\src\Components\HeroSection.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Components\HeroSection.jsx
 
 import React from "react";
 import { Container } from "react-bootstrap";
@@ -265,7 +270,7 @@ export default function HeroSection() {
   );
 }
 
-C:\Nutri-Track-React-\nutritrack\src\Components\TransButton.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Components\TransButton.jsx
 import React from "react";
 import { Button } from "react-bootstrap";
 
@@ -279,7 +284,7 @@ function TransButton({ text, onClick }) {
 
 export default TransButton;
 
-C:\Nutri-Track-React-\nutritrack\src\Components\UserContext.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Components\UserContext.jsx
 import React, { createContext, useContext, useState } from "react";
 
 const UserContext = createContext();
@@ -302,142 +307,316 @@ export function UserProvider({ children }) {
   );
 }
 
-C:\Nutri-Track-React-\nutritrack\src\Pages\AddMeal.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Pages\AdminPanel.jsx
 
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Card,
-  Form,
+  Row,
+  Col,
   Button,
+  Form,
+  Modal,
   Alert,
   Spinner
 } from "react-bootstrap";
-import { getFoods, agregarFood, getFoodById } from "../Services/FoodServices";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../Components/UserContext";
+import {
+  getUsuarios,
+  actualizarUsuario,
+  eliminarUsuario
+} from "../Services/UserService";
+import {
+  getFoods,
+  agregarFood,
+  actualizarFood,
+  eliminarFood
+} from "../Services/FoodServices";
 
-function AddMeal() {
-  const [foods, setFoods] = useState([]);
-  const [selectedId, setSelectedId] = useState("");
-  const [selectedFood, setSelectedFood] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
+export default function AdminPanel() {
+  const { user } = useUser();
   const navigate = useNavigate();
 
+  const [usuarios, setUsuarios] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [error, setError] = useState(null);
+
+  // usuarios edit modal
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+
+  // foods management
+  const [foods, setFoods] = useState([]);
+  const [foodForm, setFoodForm] = useState({
+    name: "",
+    calories: "",
+    protein: "",
+    carbs: "",
+    fat: ""
+  });
+  const [loadingFoods, setLoadingFoods] = useState(true);
+  const [busy, setBusy] = useState(false);
+
   useEffect(() => {
-    const fetchFoods = async () => {
-      try {
-        const data = await getFoods();
-        setFoods(data);
-      } catch (err) {
-        console.error("Error al cargar lista de foods:", err);
-        setError("No se pudo cargar la lista de comidas.");
-      }
-    };
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    if (user.tipoUsuario !== "Admin") {
+      navigate("/dashboard");
+      return;
+    }
+    fetchUsers();
     fetchFoods();
-  }, []);
+    // eslint-disable-next-line
+  }, [user]);
 
-  const handleChange = async (e) => {
-    const id = e.target.value;
-    setSelectedId(id);
-
-    if (id) {
-      try {
-        const food = await getFoodById(id);
-        setSelectedFood(food);
-      } catch (err) {
-        console.error("Error al obtener comida:", err);
-        setError("No se pudo obtener la información de la comida.");
-      }
-    } else {
-      setSelectedFood(null);
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const data = await getUsuarios();
+      setUsuarios(data || []);
+    } catch (error) {
+      console.error("Error cargando usuarios:", error);
+      setError("No se pudieron cargar los usuarios.");
+    } finally {
+      setLoadingUsers(false);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const fetchFoods = async () => {
+    setLoadingFoods(true);
+    try {
+      const data = await getFoods();
+      setFoods(data || []);
+    } catch (error) {
+      console.error("Error cargando foods:", error);
+      setError("No se pudieron cargar las comidas.");
+    } finally {
+      setLoadingFoods(false);
+    }
+  };
+
+  const handleEditUser = (u) => {
+    setEditUser({ ...u });
+    setShowUserModal(true);
+  };
+
+  const handleSaveUser = async () => {
+    try {
+      setBusy(true);
+      await actualizarUsuario(editUser);
+      setShowUserModal(false);
+      fetchUsers();
+    } catch (error) {
+      console.error("Error actualizando usuario:", error);
+      setError("No se pudo actualizar el usuario.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDeleteUser = async (id) => {
+    if (!window.confirm("¿Eliminar usuario permanentemente?")) return;
+    try {
+      await eliminarUsuario(id);
+      fetchUsers();
+    } catch (error) {
+      console.error("Error eliminando usuario:", error);
+      setError("No se pudo eliminar el usuario.");
+    }
+  };
+
+  // Foods form 
+  const handleFoodChange = (e) => {
+    const { name, value } = e.target;
+    setFoodForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddFood = async (e) => {
     e.preventDefault();
-    if (!selectedFood) {
-      setError("Debes seleccionar una comida.");
+    const { name, calories, protein, carbs, fat } = foodForm;
+    if (!name || calories === "") {
+      setError("Por favor llena el nombre y calorías de la comida.");
       return;
     }
-
-    setLoading(true);
-    setError(null);
-
     try {
-      // Guardo la comida seleccionada como nueva entrada en "foods"
-      await agregarFood(selectedFood);
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Error al agregar comida:", err);
-      setError("No se pudo agregar la comida. Intenta de nuevo.");
+      setBusy(true);
+      const newFood = {
+        name,
+        calories: Number(calories),
+        protein: Number(protein || 0),
+        carbs: Number(carbs || 0),
+        fat: Number(fat || 0)
+      };
+      await agregarFood(newFood);
+      setFoodForm({ name: "", calories: "", protein: "", carbs: "", fat: "" });
+      fetchFoods();
+    } catch (error) {
+      console.error("Error agregando food:", error);
+      setError("No se pudo agregar la comida.");
     } finally {
-      setLoading(false);
+      setBusy(false);
+    }
+  };
+
+  const handleDeleteFood = async (id) => {
+    if (!window.confirm("Eliminar comida del catálogo?")) return;
+    try {
+      await eliminarFood(id);
+      fetchFoods();
+    } catch (error) {
+      console.error("Error eliminando food:", error);
+      setError("No se pudo eliminar la comida.");
     }
   };
 
   return (
-    <Container
-      className="d-flex align-items-center justify-content-center"
-      style={{ minHeight: "100vh" }}
-    >
-      <Card className="p-4 shadow-sm" style={{ maxWidth: "500px", width: "100%" }}>
-        <h2 className="text-success text-center mb-3">Agregar Comida</h2>
-        <p className="text-muted text-center mb-4">
-          Selecciona una comida de la lista
-        </p>
+    <Container className="py-4">
+      <Row className="mb-3 align-items-center">
+        <Col>
+          <h2 className="text-success">Panel de Administración</h2>
+          <p className="text-muted">Gestiona usuarios y catálogo de comidas</p>
+        </Col>
+      </Row>
 
-        {error && <Alert variant="danger">{error}</Alert>}
+      {error && <Alert variant="danger">{error}</Alert>}
 
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3">
-            <Form.Label>Seleccionar comida</Form.Label>
-            <Form.Select value={selectedId} onChange={handleChange} required>
-              <option value="">-- Selecciona una comida --</option>
-              {foods.map((food) => (
-                <option key={food.id} value={food.id}>
-                  {food.name}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
+      <Row>
+        <Col md={6}>
+          <Card className="p-3 mb-4 shadow-sm">
+            <h5>Usuarios registrados</h5>
+            {loadingUsers ? (
+              <div className="text-center py-3">
+                <Spinner animation="border" />
+              </div>
+            ) : usuarios.length === 0 ? (
+              <p className="text-muted">No hay usuarios.</p>
+            ) : (
+              usuarios.map((u) => (
+                <Row key={u.id} className="py-2 border-bottom align-items-center">
+                  <Col md={4}>
+                    <strong>{u.name || u.email}</strong>
+                    <div className="text-muted small">{u.email}</div>
+                  </Col>
+                  <Col md={3}>{u.password}</Col>
+                  <Col md={2}>{u.tipoUsuario || "Normal"}</Col>
+                  <Col md={3} className="text-end">
+                    <Button size="sm" variant="outline-warning" className="me-2" onClick={() => handleEditUser(u)}>Editar</Button>
+                    <Button size="sm" variant="outline-danger" onClick={() => handleDeleteUser(u.id)}>Eliminar</Button>
+                  </Col>
+                </Row>
+              ))
+            )}
+          </Card>
+        </Col>
 
-          {selectedFood && (
-            <Card className="p-3 mb-3 shadow-sm border-success">
-              <h5 className="text-success">{selectedFood.name}</h5>
-              <p className="mb-1">🔥 Calorías: {selectedFood.calories}</p>
-              <p className="mb-1">💪 Proteína: {selectedFood.protein} g</p>
-              <p className="mb-1">🌾 Carbohidratos: {selectedFood.carbs} g</p>
-              <p className="mb-1">🥑 Grasas: {selectedFood.fat} g</p>
-            </Card>
+        <Col md={6}>
+          <Card className="p-3 mb-4 shadow-sm">
+            <h5>Agregar comida al catálogo (foods)</h5>
+            <Form onSubmit={handleAddFood}>
+              <Form.Group className="mb-2">
+                <Form.Label>Nombre</Form.Label>
+                <Form.Control name="name" value={foodForm.name} onChange={handleFoodChange} required />
+              </Form.Group>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-2">
+                    <Form.Label>Calorías</Form.Label>
+                    <Form.Control name="calories" type="number" value={foodForm.calories} onChange={handleFoodChange} required />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-2">
+                    <Form.Label>Proteína (g)</Form.Label>
+                    <Form.Control name="protein" type="number" value={foodForm.protein} onChange={handleFoodChange} />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-2">
+                    <Form.Label>Carbohidratos (g)</Form.Label>
+                    <Form.Control name="carbs" type="number" value={foodForm.carbs} onChange={handleFoodChange} />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-2">
+                    <Form.Label>Grasas (g)</Form.Label>
+                    <Form.Control name="fat" type="number" value={foodForm.fat} onChange={handleFoodChange} />
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Button variant="success" type="submit" disabled={busy} className="mt-2">
+                {busy ? <Spinner animation="border" size="sm" /> : "Agregar comida al catálogo"}
+              </Button>
+            </Form>
+          </Card>
+
+          <Card className="p-3 shadow-sm">
+            <h5>Comidas en catálogo</h5>
+            {loadingFoods ? (
+              <div className="text-center py-2"><Spinner animation="border" /></div>
+            ) : foods.length === 0 ? (
+              <p className="text-muted">No hay comidas en catálogo.</p>
+            ) : (
+              foods.map((f) => (
+                <Row key={f.id} className="py-2 border-bottom align-items-center">
+                  <Col md={6}><strong>{f.name}</strong></Col>
+                  <Col md={3}>{f.calories} cal</Col>
+                  <Col md={3} className="text-end">
+                    <Button size="sm" variant="outline-danger" onClick={() => handleDeleteFood(f.id)}>Eliminar</Button>
+                  </Col>
+                </Row>
+              ))
+            )}
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Edit user modal */}
+      <Modal show={showUserModal} onHide={() => setShowUserModal(false)} centered>
+        <Modal.Header closeButton><Modal.Title>Editar usuario</Modal.Title></Modal.Header>
+        <Modal.Body>
+          {editUser && (
+            <Form>
+              <Form.Group className="mb-2">
+                <Form.Label>Nombre</Form.Label>
+                <Form.Control value={editUser.name || ""} onChange={(e) => setEditUser({ ...editUser, name: e.target.value })} />
+              </Form.Group>
+              <Form.Group className="mb-2">
+                <Form.Label>Email</Form.Label>
+                <Form.Control value={editUser.email || ""} onChange={(e) => setEditUser({ ...editUser, email: e.target.value })} />
+              </Form.Group>
+              <Form.Group className="mb-2">
+                <Form.Label>Contraseña</Form.Label>
+                <Form.Control value={editUser.password || ""} onChange={(e) => setEditUser({ ...editUser, password: e.target.value })} />
+              </Form.Group>
+              <Form.Group className="mb-2">
+                <Form.Label>Tipo de usuario</Form.Label>
+                <Form.Select value={editUser.tipoUsuario || "Normal"} onChange={(e) => setEditUser({ ...editUser, tipoUsuario: e.target.value })}>
+                  <option value="Normal">Normal</option>
+                  <option value="Admin">Admin</option>
+                </Form.Select>
+              </Form.Group>
+            </Form>
           )}
-
-          <Button
-            variant="success"
-            type="submit"
-            className="w-100"
-            disabled={loading || !selectedFood}
-          >
-            {loading ? <Spinner animation="border" size="sm" /> : "Agregar Comida"}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowUserModal(false)}>Cancelar</Button>
+          <Button variant="success" onClick={handleSaveUser} disabled={busy}>
+            {busy ? <Spinner animation="border" size="sm" /> : "Guardar cambios"}
           </Button>
-
-          <Button
-            variant="outline-secondary"
-            className="w-100 mt-2"
-            onClick={() => navigate("/dashboard")}
-          >
-            Cancelar
-          </Button>
-        </Form>
-      </Card>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }
 
-export default AddMeal;
-
-C:\Nutri-Track-React-\nutritrack\src\Pages\DashBoard.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Pages\DashBoard.jsx
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -453,42 +632,61 @@ import {
   Modal,
   Form
 } from "react-bootstrap";
-import {
-  getFoods,
-  eliminarFood,
-  actualizarFood
-} from "../Services/FoodServices";
 import "../Styles/DashBoard.css";
+import {
+  getConsumidosByUser,
+  eliminarConsumido,
+  actualizarConsumido
+} from "../Services/ConsumidosService";
+import { getFoods } from "../Services/FoodServices";
 
 function Dashboard() {
   const { user, logout } = useUser();
   const navigate = useNavigate();
 
-  const [foods, setFoods] = useState([]);
+  const [consumidos, setConsumidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Estado para edición
+  // Estado para edición de consumido
   const [showModal, setShowModal] = useState(false);
-  const [editFood, setEditFood] = useState(null);
+  const [editConsumido, setEditConsumido] = useState(null);
+  const [foods, setFoods] = useState([]);
 
   useEffect(() => {
     if (!user) {
       navigate("/login");
       return;
     }
-    fetchFoods();
+    // si es admin, llevar al panel admin
+    if (user.tipoUsuario === "Admin") {
+      navigate("/admin");
+      return;
+    }
+    fetchConsumidos();
+    fetchFoodsCatalog();
+    
   }, [user, navigate]);
 
-  const fetchFoods = async () => {
+  const fetchConsumidos = async () => {
+    setLoading(true);
     try {
-      const data = await getFoods();
-      setFoods(data);
+      const data = await getConsumidosByUser(user.id);
+      setConsumidos(data || []);
     } catch (err) {
-      console.error("Error cargando foods:", err);
-      setError("No se pudo cargar la información nutricional.");
+      console.error("Error cargando consumidos:", err);
+      setError("No se pudo cargar tus consumos.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFoodsCatalog = async () => {
+    try {
+      const f = await getFoods();
+      setFoods(f || []);
+    } catch (err) {
+      console.error("Error cargando catálogo de foods:", err);
     }
   };
 
@@ -501,32 +699,31 @@ function Dashboard() {
     navigate("/add-meal");
   };
 
-  // Editar comida
-  const handleEdit = (food) => {
-    setEditFood({ ...food });
+  const handleEdit = (cons) => {
+    setEditConsumido({ ...cons }); // cons contains nested food object
     setShowModal(true);
   };
 
   const handleSaveEdit = async () => {
     try {
-      await actualizarFood(editFood);
+      // En el caso que se haya modificado la comida completa, aseguramos estructura
+      await actualizarConsumido(editConsumido);
       setShowModal(false);
-      fetchFoods();
+      fetchConsumidos();
     } catch (err) {
-      console.error("Error al actualizar:", err);
-      setError("No se pudo actualizar la comida.");
+      console.error("Error al actualizar consumido:", err);
+      setError("No se pudo actualizar el registro.");
     }
   };
 
-  // Elimino comida
   const handleDelete = async (id) => {
-    if (!window.confirm("¿Seguro que quieres eliminar esta comida?")) return;
+    if (!window.confirm("¿Seguro que quieres eliminar este registro de consumo?")) return;
     try {
-      await eliminarFood(id);
-      fetchFoods();
+      await eliminarConsumido(id);
+      fetchConsumidos();
     } catch (err) {
-      console.error("Error al eliminar:", err);
-      setError("No se pudo eliminar la comida.");
+      console.error("Error al eliminar consumido:", err);
+      setError("No se pudo eliminar el registro.");
     }
   };
 
@@ -542,13 +739,14 @@ function Dashboard() {
     return user.email || "Usuario";
   };
 
-  // Totales
-  const totals = foods.reduce(
-    (acc, food) => {
-      acc.calories += food.calories || 0;
-      acc.protein += food.protein || 0;
-      acc.carbs += food.carbs || 0;
-      acc.fat += food.fat || 0;
+  // Totales a partir de consumidos
+  const totals = consumidos.reduce(
+    (acc, c) => {
+      const f = c.food || {};
+      acc.calories += Number(f.calories || 0);
+      acc.protein += Number(f.protein || 0);
+      acc.carbs += Number(f.carbs || 0);
+      acc.fat += Number(f.fat || 0);
       return acc;
     },
     { calories: 0, protein: 0, carbs: 0, fat: 0 }
@@ -564,9 +762,7 @@ function Dashboard() {
           </p>
         </Col>
         <Col className="text-end">
-          <Button variant="outline-success" className="me-2">
-            Información Nutricional
-          </Button>
+          
           <Button variant="success" className="me-2" onClick={handleAddMeal}>
             + Agregar Comida
           </Button>
@@ -591,92 +787,71 @@ function Dashboard() {
               <Col>
                 <h6>🔥 Calorías</h6>
                 <p className="fs-4 text-danger">{totals.calories}</p>
-                <small>calorías consumidas hoy</small>
+                <small>calorías consumidas</small>
               </Col>
               <Col>
                 <h6>💪 Proteínas</h6>
                 <p className="fs-4 text-warning">{totals.protein} g</p>
-                <small>gramos consumidos hoy</small>
+                <small>gramos consumidos</small>
               </Col>
               <Col>
                 <h6>🌾 Carbohidratos</h6>
                 <p className="fs-4 text-success">{totals.carbs} g</p>
-                <small>gramos consumidos hoy</small>
+                <small>gramos consumidos</small>
               </Col>
               <Col>
                 <h6>🥑 Grasas</h6>
                 <p className="fs-4 text-info">{totals.fat} g</p>
-                <small>gramos consumidos hoy</small>
+                <small>gramos consumidos</small>
               </Col>
             </Row>
           </Card>
 
-          {/* Lista de comidas */}
-          {foods.length === 0 ? (
+          {/* Lista de consumidos */}
+          {consumidos.length === 0 ? (
             <Card className="p-5 text-center shadow-sm">
-              <p className="text-muted mb-3">🍽️ No hay comidas registradas</p>
-              <p className="mb-4">
-                ¡Empieza agregando tu primera comida del día!
-              </p>
-              <Button variant="success" onClick={handleAddMeal}>
-                + Agregar Primera Comida
-              </Button>
+              <p className="text-muted mb-3">🍽️ No has registrado comidas</p>
+              <p className="mb-4">¡Empieza agregando tu primera comida del día!</p>
+              <Button variant="success" onClick={handleAddMeal}>+ Agregar Comida</Button>
             </Card>
           ) : (
             <Card className="p-4 shadow-sm">
-              <h5 className="mb-3">Comidas registradas</h5>
-              {foods.map((food) => (
-                <Row
-                  key={food.id}
-                  className="py-2 border-bottom align-items-center"
-                >
-                  <Col md={3} className="fw-bold">
-                    {food.name}
-                  </Col>
-                  <Col md={2}>{food.calories} cal</Col>
-                  <Col md={2}>{food.protein} g prot</Col>
-                  <Col md={2}>{food.carbs} g carb</Col>
-                  <Col md={2}>{food.fat} g grasa</Col>
-                  <Col md={1} className="text-end">
-                    <Button
-                      size="sm"
-                      variant="outline-warning"
-                      className="me-2"
-                      onClick={() => handleEdit(food)}
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      onClick={() => handleDelete(food.id)}
-                    >
-                      Eliminar
-                    </Button>
-                  </Col>
-                </Row>
-              ))}
+              <h5 className="mb-3">Tus consumos</h5>
+              {consumidos.map((c) => {
+                const f = c.food || {};
+                return (
+                  <Row key={c.id} className="py-2 border-bottom align-items-center">
+                    <Col md={3} className="fw-bold">{f.name}</Col>
+                    <Col md={2}>{Number(f.calories || 0)} cal</Col>
+                    <Col md={2}>{Number(f.protein || 0)} g prot</Col>
+                    <Col md={2}>{Number(f.carbs || 0)} g carb</Col>
+                    <Col md={2}>{Number(f.fat || 0)} g grasa</Col>
+                    <Col md={1} className="text-end">
+                      <Button size="sm" variant="outline-warning" className="me-2" onClick={() => handleEdit(c)}>Editar</Button>
+                      <Button size="sm" variant="outline-danger" onClick={() => handleDelete(c.id)}>Eliminar</Button>
+                    </Col>
+                  </Row>
+                );
+              })}
             </Card>
           )}
         </>
       )}
 
-      {/* Modal de edición */}
+      {/* Modal de edición de consumido */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Editar Comida</Modal.Title>
+          <Modal.Title>Editar registro de consumo</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {editFood && (
+          {editConsumido && (
             <Form>
               <Form.Group className="mb-3">
                 <Form.Label>Nombre</Form.Label>
                 <Form.Control
                   type="text"
-                  value={editFood.name}
-                  onChange={(e) =>
-                    setEditFood({ ...editFood, name: e.target.value })
-                  }
+                  value={editConsumido.food?.name || ""}
+                  onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), name: e.target.value } })}
                 />
               </Form.Group>
               <Row>
@@ -685,13 +860,8 @@ function Dashboard() {
                     <Form.Label>Calorías</Form.Label>
                     <Form.Control
                       type="number"
-                      value={editFood.calories}
-                      onChange={(e) =>
-                        setEditFood({
-                          ...editFood,
-                          calories: Number(e.target.value)
-                        })
-                      }
+                      value={editConsumido.food?.calories || 0}
+                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), calories: Number(e.target.value) } })}
                     />
                   </Form.Group>
                 </Col>
@@ -700,13 +870,8 @@ function Dashboard() {
                     <Form.Label>Proteínas (g)</Form.Label>
                     <Form.Control
                       type="number"
-                      value={editFood.protein}
-                      onChange={(e) =>
-                        setEditFood({
-                          ...editFood,
-                          protein: Number(e.target.value)
-                        })
-                      }
+                      value={editConsumido.food?.protein || 0}
+                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), protein: Number(e.target.value) } })}
                     />
                   </Form.Group>
                 </Col>
@@ -717,13 +882,8 @@ function Dashboard() {
                     <Form.Label>Carbohidratos (g)</Form.Label>
                     <Form.Control
                       type="number"
-                      value={editFood.carbs}
-                      onChange={(e) =>
-                        setEditFood({
-                          ...editFood,
-                          carbs: Number(e.target.value)
-                        })
-                      }
+                      value={editConsumido.food?.carbs || 0}
+                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), carbs: Number(e.target.value) } })}
                     />
                   </Form.Group>
                 </Col>
@@ -732,13 +892,8 @@ function Dashboard() {
                     <Form.Label>Grasas (g)</Form.Label>
                     <Form.Control
                       type="number"
-                      value={editFood.fat}
-                      onChange={(e) =>
-                        setEditFood({
-                          ...editFood,
-                          fat: Number(e.target.value)
-                        })
-                      }
+                      value={editConsumido.food?.fat || 0}
+                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), fat: Number(e.target.value) } })}
                     />
                   </Form.Group>
                 </Col>
@@ -747,12 +902,8 @@ function Dashboard() {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancelar
-          </Button>
-          <Button variant="success" onClick={handleSaveEdit}>
-            Guardar cambios
-          </Button>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
+          <Button variant="success" onClick={handleSaveEdit}>Guardar cambios</Button>
         </Modal.Footer>
       </Modal>
     </Container>
@@ -761,7 +912,7 @@ function Dashboard() {
 
 export default Dashboard;
 
-C:\Nutri-Track-React-\nutritrack\src\Pages\Home.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Pages\Home.jsx
 import React from "react";
 import HeroSection from "../Components/HeroSection";
 import FeaturesSection from "../Components/FeaturesSection";
@@ -781,7 +932,8 @@ function Home() {
 
 export default Home;
 
-C:\Nutri-Track-React-\nutritrack\src\Pages\Login.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Pages\Login.jsx
+
 import React, { useState } from "react";
 import { Container, Form, Button, Alert, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -806,13 +958,20 @@ function Login() {
       const usuarios = await getUsuario(email, password);
 
       if (usuarios.length > 0) {
-        login(usuarios[0]);
-        navigate("/dashboard");
+        const usuario = usuarios[0];
+        login(usuario);
+
+        // dirigir segun tipoUsuario
+        if (usuario.tipoUsuario === "Admin") {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         setError("Correo o contraseña incorrectos.");
       }
-    } catch (err) {
-      console.error("Login error:", err);
+    } catch (error) {
+      console.error("Login error:", error);
       setError("Error al conectar con el servidor. Intenta nuevamente.");
     } finally {
       setLoading(false);
@@ -864,7 +1023,8 @@ function Login() {
 
 export default Login;
 
-C:\Nutri-Track-React-\nutritrack\src\Pages\Register.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Pages\Register.jsx
+
 import React, { useState } from "react";
 import { Container, Form, Button, Alert, Card, Row, Col, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -932,7 +1092,13 @@ function Register() {
         return;
       }
 
-      const nuevoUsuario = await agregarUsuario(formData);
+      // aseguramos tipoUsuario = "Normal" por defecto
+      const nuevoUsuarioPayload = {
+        ...formData,
+        tipoUsuario: "Normal"
+      };
+
+      const nuevoUsuario = await agregarUsuario(nuevoUsuarioPayload);
       if (!nuevoUsuario || !nuevoUsuario.id) {
         throw new Error("Error al registrar el usuario.");
       }
@@ -940,7 +1106,7 @@ function Register() {
       login(nuevoUsuario); // Guardo en contexto
       navigate("/dashboard");
     } catch (err) {
-      console.error("Error al registrar usuario:", err);
+      console.error("Error al registrar usuario:", error);
       setError("Error al registrar usuario. Intenta más tarde.");
     } finally {
       setLoading(false);
@@ -1086,7 +1252,7 @@ function Register() {
 
 export default Register;
 
-C:\Nutri-Track-React-\nutritrack\src\Routes\PrivateRoutes.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Routes\PrivateRoutes.jsx
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useUser } from "../Components/UserContext";
@@ -1103,17 +1269,16 @@ function PrivateRoute({ children }) {
 
 export default PrivateRoute;
 
-C:\Nutri-Track-React-\nutritrack\src\Routes\Routing.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Routes\Routing.jsx
 
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AddMeal from "../Pages/AddMeal";
-
-
 import Home from "../Pages/Home";
 import Register from "../Pages/Register";
 import Login from "../Pages/Login";
 import Dashboard from "../Pages/DashBoard";
+import AdminPanel from "../Pages/AdminPanel";
 import PrivateRoute from "./PrivateRoutes";
 import Header from "../Components/Header";
 
@@ -1125,7 +1290,6 @@ function Routing() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        
 
         {/* Rutas protegidas */}
         <Route
@@ -1145,7 +1309,17 @@ function Routing() {
           }
         />
 
-        {/*  ruta catch-all 404 */}
+        {/* Admin route */}
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <AdminPanel />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ruta catch-all 404 */}
         <Route path="*" element={<h2>Página no encontrada</h2>} />
       </Routes>
     </Router>
@@ -1154,9 +1328,95 @@ function Routing() {
 
 export default Routing;
 
-C:\Nutri-Track-React-\nutritrack\src\Services\FoodServices.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Services\ConsumidosService.jsx
 
+export async function getConsumidos() {
+  try {
+    const response = await fetch("http://localhost:3001/consumidos", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error al recuperar consumidos:", error);
+    throw error;
+  }
+}
 
+export async function getConsumidosByUser(userId) {
+  try {
+    const response = await fetch(`http://localhost:3001/consumidos?userId=${encodeURIComponent(userId)}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error al recuperar consumidos por usuario:", error);
+    throw error;
+  }
+}
+
+export async function getConsumidoById(id) {
+  try {
+    const response = await fetch(`http://localhost:3001/consumidos/${id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error al obtener consumido:", error);
+    throw error;
+  }
+}
+
+export async function agregarConsumido(consumidoObj) {
+  try {
+    const response = await fetch("http://localhost:3001/consumidos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(consumidoObj)
+    });
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error al agregar consumido:", error);
+    throw error;
+  }
+}
+
+export async function actualizarConsumido(consumidoObj) {
+  try {
+    const response = await fetch(`http://localhost:3001/consumidos/${consumidoObj.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(consumidoObj)
+    });
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error al actualizar consumido:", error);
+    throw error;
+  }
+}
+
+export async function eliminarConsumido(id) {
+  try {
+    const response = await fetch(`http://localhost:3001/consumidos/${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+    
+  } catch (error) {
+    console.error("Error al eliminar consumido:", error);
+    throw error;
+  }
+}
+
+C:\Users\Estudiantes\Desktop\nutritrack\src\Services\FoodServices.jsx
 /* Obtengo todos los alimentos */
 export async function getFoods() {
   try {
@@ -1243,7 +1503,7 @@ export async function eliminarFood(id) {
   }
 }
 
-C:\Nutri-Track-React-\nutritrack\src\Services\UserService.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\Services\UserService.jsx
 
 
 export async function getUsuarios() {
@@ -1256,6 +1516,21 @@ export async function getUsuarios() {
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
     return [];
+  }
+}
+
+export async function getUsuario(email, password) {
+  try {
+    const response = await fetch(
+      `http://localhost:3001/usuarios?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+    );
+    if (!response.ok) {
+      throw new Error("Error en la petición de login");
+    }
+    return await response.json(); // devuelve array con usuario
+  } catch (error) {
+    console.error("Error al obtener usuario:", error);
+    throw error;
   }
 }
 
@@ -1276,23 +1551,49 @@ export async function agregarUsuario(data) {
   }
 }
 
-//  FUNCIÓN para login: obtener usuario por email y password
-export async function getUsuario(email, password) {
+export async function getUsuarioById(id) {
   try {
-    const response = await fetch(
-      `http://localhost:3001/usuarios?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
-    );
-    if (!response.ok) {
-      throw new Error("Error en la petición de login");
-    }
-    return await response.json(); // devuelve array con usuario
+    const response = await fetch(`http://localhost:3001/usuarios/${id}`);
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+    return await response.json();
   } catch (error) {
-    console.error("Error al obtener usuario:", error);
+    console.error("Error al obtener usuario por id:", error);
     throw error;
   }
 }
 
-C:\Nutri-Track-React-\nutritrack\src\Styles\AboutSection.css
+export async function actualizarUsuario(userObj) {
+  try {
+    const response = await fetch(`http://localhost:3001/usuarios/${userObj.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userObj)
+    });
+    if (!response.ok) {
+      throw new Error("No se pudo actualizar el usuario.");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error al actualizar usuario:", error);
+    throw error;
+  }
+}
+
+export async function eliminarUsuario(id) {
+  try {
+    const response = await fetch(`http://localhost:3001/usuarios/${id}`, {
+      method: "DELETE"
+    });
+    if (!response.ok) {
+      throw new Error("No se pudo eliminar el usuario.");
+    }
+  } catch (error) {
+    console.error("Error al eliminar usuario:", error);
+    throw error;
+  }
+}
+
+C:\Users\Estudiantes\Desktop\nutritrack\src\Styles\AboutSection.css
 
 @media (max-width: 576px) {
   .about-section h5 {
@@ -1308,7 +1609,7 @@ C:\Nutri-Track-React-\nutritrack\src\Styles\AboutSection.css
   }
 }
 
-C:\Nutri-Track-React-\nutritrack\src\Styles\DashBoard.css
+C:\Users\Estudiantes\Desktop\nutritrack\src\Styles\DashBoard.css
 .dashboard-wrapper {
   min-height: 100vh;
   background-color: #f8fdf8;
@@ -1339,7 +1640,7 @@ C:\Nutri-Track-React-\nutritrack\src\Styles\DashBoard.css
   }
 }
 
-C:\Nutri-Track-React-\nutritrack\src\App.css
+C:\Users\Estudiantes\Desktop\nutritrack\src\App.css
 body {
   font-family: "Poppins", "Segoe UI", Roboto, Arial, sans-serif;
   background: linear-gradient(180deg, #f9fafb 0%, #eef9f3 100%);
@@ -1422,7 +1723,7 @@ footer a:hover {
   text-decoration: underline;
 }
 
-C:\Nutri-Track-React-\nutritrack\src\App.
+C:\Users\Estudiantes\Desktop\nutritrack\src\App.jsx
 import React from "react";
 import Routing from "./Routes/Routing";
 import Footer from "./Components/Footer";
@@ -1439,7 +1740,7 @@ function App() {
 
 export default App;
 
-C:\Nutri-Track-React-\nutritrack\src\index.css
+C:\Users\Estudiantes\Desktop\nutritrack\src\index.css
 body {
   margin: 0;
   min-width: 320px;
@@ -1498,7 +1799,7 @@ button:focus-visible {
   }
 }
 
-C:\Nutri-Track-React-\nutritrack\src\main.jsx
+C:\Users\Estudiantes\Desktop\nutritrack\src\main.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
@@ -1513,91 +1814,34 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   </React.StrictMode>
 );
 
-C:\Nutri-Track-React-\nutritrack\db.json
-{
-  "usuarios": [
-    {
-      "id": "1",
-      "name": "Carlos Pérez",
-      "edad": 28,
-      "email": "carlos@nutri.com",
-      "password": "123456",
-      "peso": 72,
-      "altura": 175,
-      "genero": "Hombre",
-      "condiciones": [
-        "Hipertensión"
-      ],
-      "alergias": [
-        "Gluten"
-      ]
-    },
-    {
-      "id": "2",
-      "name": "María López",
-      "edad": 34,
-      "email": "maria@nutri.com",
-      "password": "654321",
-      "peso": 60,
-      "altura": 162,
-      "genero": "Mujer",
-      "condiciones": [
-        "Diabetes"
-      ],
-      "alergias": [
-        "Lactosa"
-      ]
-    },
-    {
-      "id": "3",
-      "name": "Javier García",
-      "edad": 40,
-      "email": "javier@nutri.com",
-      "password": "nutri2024",
-      "peso": 80,
-      "altura": 178,
-      "genero": "Hombre",
-      "condiciones": [
-        "Hipotiroidismo"
-      ],
-      "alergias": [
-        "Nueces",
-        "Mariscos"
-      ]
-    },
-    {
-      "id": "4",
-      "name": "Lucía Fernández",
-      "edad": 25,
-      "email": "lucia@nutri.com",
-      "password": "healthy123",
-      "peso": 55,
-      "altura": 160,
-      "genero": "Mujer",
-      "condiciones": [],
-      "alergias": []
-    },
-    {
-      "id": "5",
-      "name": "Andrés Torres",
-      "edad": 31,
-      "email": "andres@nutri.com",
-      "password": "planfit",
-      "peso": 68,
-      "altura": 172,
-      "genero": "Hombre",
-      "condiciones": [
-        "Celiaquía"
-      ],
-      "alergias": [
-        "Gluten"
-      ]
-    }
-  ],
-  "foods": []
-}
+C:\Users\Estudiantes\Desktop\nutritrack\.gitignore
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-C:\Nutri-Track-React-\nutritrack\index.html
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+C:\Users\Estudiantes\Desktop\nutritrack\index.html
 <!doctype html>
 <html lang="es">
   <head>

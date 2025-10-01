@@ -1,4 +1,4 @@
-/* Obtengo todos los alimentos */
+
 export async function getFoods() {
   try {
     const response = await fetch("http://localhost:3001/foods", {

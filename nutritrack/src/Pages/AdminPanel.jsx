@@ -60,7 +60,7 @@ export default function AdminPanel() {
     }
     fetchUsers();
     fetchFoods();
-    // eslint-disable-next-line
+   
   }, [user]);
 
   const fetchUsers = async () => {
@@ -68,8 +68,8 @@ export default function AdminPanel() {
     try {
       const data = await getUsuarios();
       setUsuarios(data || []);
-    } catch (err) {
-      console.error("Error cargando usuarios:", err);
+    } catch (error) {
+      console.error("Error cargando usuarios:", error);
       setError("No se pudieron cargar los usuarios.");
     } finally {
       setLoadingUsers(false);
@@ -81,8 +81,8 @@ export default function AdminPanel() {
     try {
       const data = await getFoods();
       setFoods(data || []);
-    } catch (err) {
-      console.error("Error cargando foods:", err);
+    } catch (error) {
+      console.error("Error cargando foods:", error);
       setError("No se pudieron cargar las comidas.");
     } finally {
       setLoadingFoods(false);
@@ -100,8 +100,8 @@ export default function AdminPanel() {
       await actualizarUsuario(editUser);
       setShowUserModal(false);
       fetchUsers();
-    } catch (err) {
-      console.error("Error actualizando usuario:", err);
+    } catch (error) {
+      console.error("Error actualizando usuario:", error);
       setError("No se pudo actualizar el usuario.");
     } finally {
       setBusy(false);
@@ -113,8 +113,8 @@ export default function AdminPanel() {
     try {
       await eliminarUsuario(id);
       fetchUsers();
-    } catch (err) {
-      console.error("Error eliminando usuario:", err);
+    } catch (error) {
+      console.error("Error eliminando usuario:", error);
       setError("No se pudo eliminar el usuario.");
     }
   };
@@ -144,8 +144,8 @@ export default function AdminPanel() {
       await agregarFood(newFood);
       setFoodForm({ name: "", calories: "", protein: "", carbs: "", fat: "" });
       fetchFoods();
-    } catch (err) {
-      console.error("Error agregando food:", err);
+    } catch (error) {
+      console.error("Error agregando food:", error);
       setError("No se pudo agregar la comida.");
     } finally {
       setBusy(false);
@@ -157,8 +157,8 @@ export default function AdminPanel() {
     try {
       await eliminarFood(id);
       fetchFoods();
-    } catch (err) {
-      console.error("Error eliminando food:", err);
+    } catch (error) {
+      console.error("Error eliminando food:", error);
       setError("No se pudo eliminar la comida.");
     }
   };

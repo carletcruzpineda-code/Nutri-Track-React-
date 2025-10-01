@@ -54,8 +54,8 @@ function Dashboard() {
     try {
       const data = await getConsumidosByUser(user.id);
       setConsumidos(data || []);
-    } catch (err) {
-      console.error("Error cargando consumidos:", err);
+    } catch (error) {
+      console.error("Error cargando consumidos:", error);
       setError("No se pudo cargar tus consumos.");
     } finally {
       setLoading(false);
@@ -66,8 +66,8 @@ function Dashboard() {
     try {
       const f = await getFoods();
       setFoods(f || []);
-    } catch (err) {
-      console.error("Error cargando catálogo de foods:", err);
+    } catch (error) {
+      console.error("Error cargando catálogo de foods:", error);
     }
   };
 
@@ -81,18 +81,18 @@ function Dashboard() {
   };
 
   const handleEdit = (cons) => {
-    setEditConsumido({ ...cons }); // cons contains nested food object
-    setShowModal(true);
+    setEditConsumido({ ...cons });
+    setShowModal(true); // <-- Agrega esta línea
   };
 
   const handleSaveEdit = async () => {
     try {
-      // En el caso que se haya modificado la comida completa, aseguramos estructura
+
       await actualizarConsumido(editConsumido);
       setShowModal(false);
       fetchConsumidos();
-    } catch (err) {
-      console.error("Error al actualizar consumido:", err);
+    } catch (error) {
+      console.error("Error al actualizar consumido:", error);
       setError("No se pudo actualizar el registro.");
     }
   };
@@ -102,8 +102,8 @@ function Dashboard() {
     try {
       await eliminarConsumido(id);
       fetchConsumidos();
-    } catch (err) {
-      console.error("Error al eliminar consumido:", err);
+    } catch (error) {
+      console.error("Error al eliminar consumido:", error);
       setError("No se pudo eliminar el registro.");
     }
   };
@@ -143,9 +143,7 @@ function Dashboard() {
           </p>
         </Col>
         <Col className="text-end">
-          <Button variant="outline-success" className="me-2">
-            Información Nutricional
-          </Button>
+         
           <Button variant="success" className="me-2" onClick={handleAddMeal}>
             + Agregar Comida
           </Button>

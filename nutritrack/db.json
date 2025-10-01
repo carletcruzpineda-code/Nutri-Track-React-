@@ -83,6 +83,188 @@
       "tipoUsuario": "Normal"
     }
   ],
-  "foods": [],
-  "consumidos": []
+  "foods": [
+    {
+      "id": "9649",
+      "name": "Pechuga de pollo a la plancha",
+      "calories": 165,
+      "protein": 31,
+      "carbs": 0,
+      "fat": 3.6
+    },
+    {
+      "id": "da65",
+      "name": "Arroz blanco cocido",
+      "calories": 130,
+      "protein": 2.4,
+      "carbs": 28,
+      "fat": 0.3
+    },
+    {
+      "id": "3317",
+      "name": "Lentejas cocidas",
+      "calories": 116,
+      "protein": 9,
+      "carbs": 20,
+      "fat": 0.4
+    },
+    {
+      "id": "44c4",
+      "name": "Carne de res magra (filete)",
+      "calories": 217,
+      "protein": 26,
+      "carbs": 0,
+      "fat": 12
+    },
+    {
+      "id": "00b4",
+      "name": "Salmón al horno",
+      "calories": 208,
+      "protein": 20,
+      "carbs": 0,
+      "fat": 13
+    },
+    {
+      "id": "b5a6",
+      "name": "Huevo",
+      "calories": 143,
+      "protein": 48,
+      "carbs": 1,
+      "fat": 9.5
+    },
+    {
+      "id": "cb05",
+      "name": "Brócoli al vapor",
+      "calories": 35,
+      "protein": 2.8,
+      "carbs": 7,
+      "fat": 0.4
+    },
+    {
+      "id": "1995",
+      "name": "Banana",
+      "calories": 89,
+      "protein": 1.1,
+      "carbs": 23,
+      "fat": 0.3
+    },
+    {
+      "id": "b29a",
+      "name": "Avena integral cruda",
+      "calories": 389,
+      "protein": 1.1,
+      "carbs": 23,
+      "fat": 0.3
+    },
+    {
+      "id": "4e4c",
+      "name": "Avena integral cruda",
+      "calories": 389,
+      "protein": 16.9,
+      "carbs": 66,
+      "fat": 6.9
+    },
+    {
+      "id": "5cf5",
+      "name": "Yogur natural sin grasa",
+      "calories": 59,
+      "protein": 10,
+      "carbs": 3.6,
+      "fat": 0.4
+    },
+    {
+      "id": "fb82",
+      "name": "Manzana",
+      "calories": 52,
+      "protein": 0.3,
+      "carbs": 14,
+      "fat": 0.2
+    },
+    {
+      "id": "22b6",
+      "name": "Pechuga de pavo sin piel",
+      "calories": 135,
+      "protein": 29,
+      "carbs": 0,
+      "fat": 1
+    },
+    {
+      "id": "5341",
+      "name": "Quinoa cocida",
+      "calories": 120,
+      "protein": 4.4,
+      "carbs": 21.3,
+      "fat": 1.9
+    },
+    {
+      "id": "2c0f",
+      "name": "Papa Hervida",
+      "calories": 77,
+      "protein": 2,
+      "carbs": 17,
+      "fat": 0.1
+    },
+    {
+      "id": "3f10",
+      "name": "Tofu firme",
+      "calories": 76,
+      "protein": 8,
+      "carbs": 1.9,
+      "fat": 4.8
+    },
+    {
+      "id": "94e2",
+      "name": "Atún en agua (lata)",
+      "calories": 116,
+      "protein": 26,
+      "carbs": 0,
+      "fat": 1
+    },
+    {
+      "id": "89f3",
+      "name": "Pan integral (1 rebanada, 30g)",
+      "calories": 69,
+      "protein": 3.6,
+      "carbs": 12,
+      "fat": 1
+    },
+    {
+      "id": "c9eb",
+      "name": "Frijoles",
+      "calories": 151,
+      "protein": 18.2,
+      "carbs": 50.4,
+      "fat": 1
+    }
+  ],
+  "consumidos": [
+    {
+      "id": "8cf0",
+      "userId": "4",
+      "foodId": "73eb",
+      "food": {
+        "id": "73eb",
+        "name": "prueba2",
+        "calories": 3,
+        "protein": 5,
+        "carbs": 25,
+        "fat": 19
+      },
+      "date": "2025-10-01T23:31:49.775Z"
+    },
+    {
+      "id": "7620",
+      "userId": "4",
+      "foodId": "5341",
+      "food": {
+        "id": "5341",
+        "name": "Quinoa cocida",
+        "calories": 120,
+        "protein": 4.4,
+        "carbs": 21.3,
+        "fat": 1.9
+      },
+      "date": "2025-10-01T23:43:57.530Z"
+    }
+  ]
 }

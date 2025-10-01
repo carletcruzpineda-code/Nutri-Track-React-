@@ -1,4 +1,4 @@
-/* src/Pages/AddMeal.jsx */
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -28,8 +28,8 @@ function AddMeal() {
       try {
         const data = await getFoods();
         setFoods(data);
-      } catch (err) {
-        console.error("Error al cargar lista de foods:", err);
+      } catch (error) {
+        console.error("Error al cargar lista de foods:", error);
         setError("No se pudo cargar la lista de comidas.");
       }
     };
@@ -44,8 +44,8 @@ function AddMeal() {
       try {
         const food = await getFoodById(id);
         setSelectedFood(food);
-      } catch (err) {
-        console.error("Error al obtener comida:", err);
+      } catch (error) {
+        console.error("Error al obtener comida:", error);
         setError("No se pudo obtener la información de la comida.");
       }
     } else {
@@ -69,7 +69,7 @@ function AddMeal() {
     setError(null);
 
     try {
-      // construyo objeto consumido - guardo el food dentro para simplificar lecturas
+      // construyo objeto consumido - guardo el food dentro para simplificar 
       const consumido = {
         userId: user.id,
         foodId: selectedFood.id,
@@ -78,8 +78,8 @@ function AddMeal() {
       };
       await agregarConsumido(consumido);
       navigate("/dashboard");
-    } catch (err) {
-      console.error("Error al agregar consumido:", err);
+    } catch (error) {
+      console.error("Error al agregar consumido:", error);
       setError("No se pudo registrar la comida. Intenta de nuevo.");
     } finally {
       setLoading(false);

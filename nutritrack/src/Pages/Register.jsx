@@ -1,4 +1,4 @@
-/* src/Pages/Register.jsx */
+
 import React, { useState } from "react";
 import { Container, Form, Button, Alert, Card, Row, Col, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -79,8 +79,8 @@ function Register() {
 
       login(nuevoUsuario); // Guardo en contexto
       navigate("/dashboard");
-    } catch (err) {
-      console.error("Error al registrar usuario:", err);
+    } catch (error) {
+      console.error("Error al registrar usuario:", error);
       setError("Error al registrar usuario. Intenta más tarde.");
     } finally {
       setLoading(false);

@@ -1,4 +1,4 @@
-/* src/Pages/Login.jsx */
+
 import React, { useState } from "react";
 import { Container, Form, Button, Alert, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -35,8 +35,8 @@ function Login() {
       } else {
         setError("Correo o contraseña incorrectos.");
       }
-    } catch (err) {
-      console.error("Login error:", err);
+    } catch (error) {
+      console.error("Login error:", error);
       setError("Error al conectar con el servidor. Intenta nuevamente.");
     } finally {
       setLoading(false);

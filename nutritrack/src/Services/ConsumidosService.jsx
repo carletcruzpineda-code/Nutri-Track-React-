@@ -1,4 +1,4 @@
-/* src/Services/ConsumidosService.jsx */
+
 export async function getConsumidos() {
   try {
     const response = await fetch("http://localhost:3001/consumidos", {
