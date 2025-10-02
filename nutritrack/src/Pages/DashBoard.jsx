@@ -1,4 +1,4 @@
-/* src/Pages/DashBoard.jsx */
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../Components/UserContext";
@@ -46,7 +46,7 @@ function Dashboard() {
     }
     fetchConsumidos();
     fetchFoodsCatalog();
-    // eslint-disable-next-line
+   
   }, [user, navigate]);
 
   const fetchConsumidos = async () => {
@@ -82,7 +82,7 @@ function Dashboard() {
 
   const handleEdit = (cons) => {
     setEditConsumido({ ...cons });
-    setShowModal(true); // <-- Agrega esta línea
+    setShowModal(true); 
   };
 
   const handleSaveEdit = async () => {

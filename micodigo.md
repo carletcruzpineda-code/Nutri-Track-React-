@@ -1,4 +1,4 @@
-C:\Users\Estudiantes\Desktop\nutritrack\src\Components\AboutSection.jsx
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\Components\AboutSection.jsx
 import React from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { BookOpen, Target, Eye } from "lucide-react";
@@ -76,7 +76,7 @@ function AboutSection() {
 
 export default AboutSection;
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\Components\FeaturesSection.jsx
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\Components\FeaturesSection.jsx
 import React from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 
@@ -110,7 +110,7 @@ function FeaturesSection() {
 
 export default FeaturesSection;
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\Components\Footer.jsx
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\Components\Footer.jsx
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import {
@@ -180,7 +180,7 @@ function Footer() {
 
 export default Footer;
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\Components\Header.jsx
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\Components\Header.jsx
 
 import React from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
@@ -225,8 +225,7 @@ function Header() {
 
 export default Header;
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\Components\HeroSection.jsx
-
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\Components\HeroSection.jsx
 import React from "react";
 import { Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -270,7 +269,7 @@ export default function HeroSection() {
   );
 }
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\Components\TransButton.jsx
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\Components\TransButton.jsx
 import React from "react";
 import { Button } from "react-bootstrap";
 
@@ -284,1226 +283,7 @@ function TransButton({ text, onClick }) {
 
 export default TransButton;
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\Components\UserContext.jsx
-import React, { createContext, useContext, useState } from "react";
-
-const UserContext = createContext();
-
-export const useUser = () => useContext(UserContext);
-
-export function UserProvider({ children }) {
-  const [user, setUser] = useState(null);
-
-  // Guardo el objeto usuario completo
-  const login = (userData) => setUser(userData);
-
-  // Limpio el usuario
-  const logout = () => setUser(null);
-
-  return (
-    <UserContext.Provider value={{ user, login, logout }}>
-      {children}
-    </UserContext.Provider>
-  );
-}
-
-C:\Users\Estudiantes\Desktop\nutritrack\src\Pages\AdminPanel.jsx
-
-import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Card,
-  Row,
-  Col,
-  Button,
-  Form,
-  Modal,
-  Alert,
-  Spinner
-} from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "../Components/UserContext";
-import {
-  getUsuarios,
-  actualizarUsuario,
-  eliminarUsuario
-} from "../Services/UserService";
-import {
-  getFoods,
-  agregarFood,
-  actualizarFood,
-  eliminarFood
-} from "../Services/FoodServices";
-
-export default function AdminPanel() {
-  const { user } = useUser();
-  const navigate = useNavigate();
-
-  const [usuarios, setUsuarios] = useState([]);
-  const [loadingUsers, setLoadingUsers] = useState(true);
-  const [error, setError] = useState(null);
-
-  // usuarios edit modal
-  const [showUserModal, setShowUserModal] = useState(false);
-  const [editUser, setEditUser] = useState(null);
-
-  // foods management
-  const [foods, setFoods] = useState([]);
-  const [foodForm, setFoodForm] = useState({
-    name: "",
-    calories: "",
-    protein: "",
-    carbs: "",
-    fat: ""
-  });
-  const [loadingFoods, setLoadingFoods] = useState(true);
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    if (user.tipoUsuario !== "Admin") {
-      navigate("/dashboard");
-      return;
-    }
-    fetchUsers();
-    fetchFoods();
-    // eslint-disable-next-line
-  }, [user]);
-
-  const fetchUsers = async () => {
-    setLoadingUsers(true);
-    try {
-      const data = await getUsuarios();
-      setUsuarios(data || []);
-    } catch (error) {
-      console.error("Error cargando usuarios:", error);
-      setError("No se pudieron cargar los usuarios.");
-    } finally {
-      setLoadingUsers(false);
-    }
-  };
-
-  const fetchFoods = async () => {
-    setLoadingFoods(true);
-    try {
-      const data = await getFoods();
-      setFoods(data || []);
-    } catch (error) {
-      console.error("Error cargando foods:", error);
-      setError("No se pudieron cargar las comidas.");
-    } finally {
-      setLoadingFoods(false);
-    }
-  };
-
-  const handleEditUser = (u) => {
-    setEditUser({ ...u });
-    setShowUserModal(true);
-  };
-
-  const handleSaveUser = async () => {
-    try {
-      setBusy(true);
-      await actualizarUsuario(editUser);
-      setShowUserModal(false);
-      fetchUsers();
-    } catch (error) {
-      console.error("Error actualizando usuario:", error);
-      setError("No se pudo actualizar el usuario.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleDeleteUser = async (id) => {
-    if (!window.confirm("¿Eliminar usuario permanentemente?")) return;
-    try {
-      await eliminarUsuario(id);
-      fetchUsers();
-    } catch (error) {
-      console.error("Error eliminando usuario:", error);
-      setError("No se pudo eliminar el usuario.");
-    }
-  };
-
-  // Foods form 
-  const handleFoodChange = (e) => {
-    const { name, value } = e.target;
-    setFoodForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleAddFood = async (e) => {
-    e.preventDefault();
-    const { name, calories, protein, carbs, fat } = foodForm;
-    if (!name || calories === "") {
-      setError("Por favor llena el nombre y calorías de la comida.");
-      return;
-    }
-    try {
-      setBusy(true);
-      const newFood = {
-        name,
-        calories: Number(calories),
-        protein: Number(protein || 0),
-        carbs: Number(carbs || 0),
-        fat: Number(fat || 0)
-      };
-      await agregarFood(newFood);
-      setFoodForm({ name: "", calories: "", protein: "", carbs: "", fat: "" });
-      fetchFoods();
-    } catch (error) {
-      console.error("Error agregando food:", error);
-      setError("No se pudo agregar la comida.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleDeleteFood = async (id) => {
-    if (!window.confirm("Eliminar comida del catálogo?")) return;
-    try {
-      await eliminarFood(id);
-      fetchFoods();
-    } catch (error) {
-      console.error("Error eliminando food:", error);
-      setError("No se pudo eliminar la comida.");
-    }
-  };
-
-  return (
-    <Container className="py-4">
-      <Row className="mb-3 align-items-center">
-        <Col>
-          <h2 className="text-success">Panel de Administración</h2>
-          <p className="text-muted">Gestiona usuarios y catálogo de comidas</p>
-        </Col>
-      </Row>
-
-      {error && <Alert variant="danger">{error}</Alert>}
-
-      <Row>
-        <Col md={6}>
-          <Card className="p-3 mb-4 shadow-sm">
-            <h5>Usuarios registrados</h5>
-            {loadingUsers ? (
-              <div className="text-center py-3">
-                <Spinner animation="border" />
-              </div>
-            ) : usuarios.length === 0 ? (
-              <p className="text-muted">No hay usuarios.</p>
-            ) : (
-              usuarios.map((u) => (
-                <Row key={u.id} className="py-2 border-bottom align-items-center">
-                  <Col md={4}>
-                    <strong>{u.name || u.email}</strong>
-                    <div className="text-muted small">{u.email}</div>
-                  </Col>
-                  <Col md={3}>{u.password}</Col>
-                  <Col md={2}>{u.tipoUsuario || "Normal"}</Col>
-                  <Col md={3} className="text-end">
-                    <Button size="sm" variant="outline-warning" className="me-2" onClick={() => handleEditUser(u)}>Editar</Button>
-                    <Button size="sm" variant="outline-danger" onClick={() => handleDeleteUser(u.id)}>Eliminar</Button>
-                  </Col>
-                </Row>
-              ))
-            )}
-          </Card>
-        </Col>
-
-        <Col md={6}>
-          <Card className="p-3 mb-4 shadow-sm">
-            <h5>Agregar comida al catálogo (foods)</h5>
-            <Form onSubmit={handleAddFood}>
-              <Form.Group className="mb-2">
-                <Form.Label>Nombre</Form.Label>
-                <Form.Control name="name" value={foodForm.name} onChange={handleFoodChange} required />
-              </Form.Group>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-2">
-                    <Form.Label>Calorías</Form.Label>
-                    <Form.Control name="calories" type="number" value={foodForm.calories} onChange={handleFoodChange} required />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-2">
-                    <Form.Label>Proteína (g)</Form.Label>
-                    <Form.Control name="protein" type="number" value={foodForm.protein} onChange={handleFoodChange} />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-2">
-                    <Form.Label>Carbohidratos (g)</Form.Label>
-                    <Form.Control name="carbs" type="number" value={foodForm.carbs} onChange={handleFoodChange} />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-2">
-                    <Form.Label>Grasas (g)</Form.Label>
-                    <Form.Control name="fat" type="number" value={foodForm.fat} onChange={handleFoodChange} />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Button variant="success" type="submit" disabled={busy} className="mt-2">
-                {busy ? <Spinner animation="border" size="sm" /> : "Agregar comida al catálogo"}
-              </Button>
-            </Form>
-          </Card>
-
-          <Card className="p-3 shadow-sm">
-            <h5>Comidas en catálogo</h5>
-            {loadingFoods ? (
-              <div className="text-center py-2"><Spinner animation="border" /></div>
-            ) : foods.length === 0 ? (
-              <p className="text-muted">No hay comidas en catálogo.</p>
-            ) : (
-              foods.map((f) => (
-                <Row key={f.id} className="py-2 border-bottom align-items-center">
-                  <Col md={6}><strong>{f.name}</strong></Col>
-                  <Col md={3}>{f.calories} cal</Col>
-                  <Col md={3} className="text-end">
-                    <Button size="sm" variant="outline-danger" onClick={() => handleDeleteFood(f.id)}>Eliminar</Button>
-                  </Col>
-                </Row>
-              ))
-            )}
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Edit user modal */}
-      <Modal show={showUserModal} onHide={() => setShowUserModal(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Editar usuario</Modal.Title></Modal.Header>
-        <Modal.Body>
-          {editUser && (
-            <Form>
-              <Form.Group className="mb-2">
-                <Form.Label>Nombre</Form.Label>
-                <Form.Control value={editUser.name || ""} onChange={(e) => setEditUser({ ...editUser, name: e.target.value })} />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Email</Form.Label>
-                <Form.Control value={editUser.email || ""} onChange={(e) => setEditUser({ ...editUser, email: e.target.value })} />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Contraseña</Form.Label>
-                <Form.Control value={editUser.password || ""} onChange={(e) => setEditUser({ ...editUser, password: e.target.value })} />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Tipo de usuario</Form.Label>
-                <Form.Select value={editUser.tipoUsuario || "Normal"} onChange={(e) => setEditUser({ ...editUser, tipoUsuario: e.target.value })}>
-                  <option value="Normal">Normal</option>
-                  <option value="Admin">Admin</option>
-                </Form.Select>
-              </Form.Group>
-            </Form>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowUserModal(false)}>Cancelar</Button>
-          <Button variant="success" onClick={handleSaveUser} disabled={busy}>
-            {busy ? <Spinner animation="border" size="sm" /> : "Guardar cambios"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
-  );
-}
-
-C:\Users\Estudiantes\Desktop\nutritrack\src\Pages\DashBoard.jsx
-
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "../Components/UserContext";
-import {
-  Container,
-  Button,
-  Card,
-  Row,
-  Col,
-  Spinner,
-  Alert,
-  Modal,
-  Form
-} from "react-bootstrap";
-import "../Styles/DashBoard.css";
-import {
-  getConsumidosByUser,
-  eliminarConsumido,
-  actualizarConsumido
-} from "../Services/ConsumidosService";
-import { getFoods } from "../Services/FoodServices";
-
-function Dashboard() {
-  const { user, logout } = useUser();
-  const navigate = useNavigate();
-
-  const [consumidos, setConsumidos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Estado para edición de consumido
-  const [showModal, setShowModal] = useState(false);
-  const [editConsumido, setEditConsumido] = useState(null);
-  const [foods, setFoods] = useState([]);
-
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    // si es admin, llevar al panel admin
-    if (user.tipoUsuario === "Admin") {
-      navigate("/admin");
-      return;
-    }
-    fetchConsumidos();
-    fetchFoodsCatalog();
-    
-  }, [user, navigate]);
-
-  const fetchConsumidos = async () => {
-    setLoading(true);
-    try {
-      const data = await getConsumidosByUser(user.id);
-      setConsumidos(data || []);
-    } catch (err) {
-      console.error("Error cargando consumidos:", err);
-      setError("No se pudo cargar tus consumos.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchFoodsCatalog = async () => {
-    try {
-      const f = await getFoods();
-      setFoods(f || []);
-    } catch (err) {
-      console.error("Error cargando catálogo de foods:", err);
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-
-  const handleAddMeal = () => {
-    navigate("/add-meal");
-  };
-
-  const handleEdit = (cons) => {
-    setEditConsumido({ ...cons }); // cons contains nested food object
-    setShowModal(true);
-  };
-
-  const handleSaveEdit = async () => {
-    try {
-      // En el caso que se haya modificado la comida completa, aseguramos estructura
-      await actualizarConsumido(editConsumido);
-      setShowModal(false);
-      fetchConsumidos();
-    } catch (err) {
-      console.error("Error al actualizar consumido:", err);
-      setError("No se pudo actualizar el registro.");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("¿Seguro que quieres eliminar este registro de consumo?")) return;
-    try {
-      await eliminarConsumido(id);
-      fetchConsumidos();
-    } catch (err) {
-      console.error("Error al eliminar consumido:", err);
-      setError("No se pudo eliminar el registro.");
-    }
-  };
-
-  // Nombre del usuario
-  const getUserDisplayName = () => {
-    if (!user) return "Usuario";
-    if (typeof user.name === "string") return user.name;
-    if (typeof user.name === "object") {
-      const first = user.name.first || "";
-      const last = user.name.last || "";
-      return (first + " " + last).trim() || user.email || "Usuario";
-    }
-    return user.email || "Usuario";
-  };
-
-  // Totales a partir de consumidos
-  const totals = consumidos.reduce(
-    (acc, c) => {
-      const f = c.food || {};
-      acc.calories += Number(f.calories || 0);
-      acc.protein += Number(f.protein || 0);
-      acc.carbs += Number(f.carbs || 0);
-      acc.fat += Number(f.fat || 0);
-      return acc;
-    },
-    { calories: 0, protein: 0, carbs: 0, fat: 0 }
-  );
-
-  return (
-    <Container fluid className="dashboard-wrapper py-4">
-      <Row className="mb-4 align-items-center">
-        <Col>
-          <h2 className="text-success">¡Hola, {getUserDisplayName()}! 👋</h2>
-          <p className="text-muted">
-            Registra tus comidas y mantén un seguimiento de tu nutrición diaria.
-          </p>
-        </Col>
-        <Col className="text-end">
-          
-          <Button variant="success" className="me-2" onClick={handleAddMeal}>
-            + Agregar Comida
-          </Button>
-          <Button variant="outline-danger" onClick={handleLogout}>
-            Cerrar Sesión
-          </Button>
-        </Col>
-      </Row>
-
-      {loading ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="success" />
-        </div>
-      ) : error ? (
-        <Alert variant="danger">{error}</Alert>
-      ) : (
-        <>
-          {/* Totales */}
-          <Card className="p-4 mb-4 shadow-sm">
-            <h5 className="mb-3">Totales Nutricionales del Día</h5>
-            <Row className="text-center">
-              <Col>
-                <h6>🔥 Calorías</h6>
-                <p className="fs-4 text-danger">{totals.calories}</p>
-                <small>calorías consumidas</small>
-              </Col>
-              <Col>
-                <h6>💪 Proteínas</h6>
-                <p className="fs-4 text-warning">{totals.protein} g</p>
-                <small>gramos consumidos</small>
-              </Col>
-              <Col>
-                <h6>🌾 Carbohidratos</h6>
-                <p className="fs-4 text-success">{totals.carbs} g</p>
-                <small>gramos consumidos</small>
-              </Col>
-              <Col>
-                <h6>🥑 Grasas</h6>
-                <p className="fs-4 text-info">{totals.fat} g</p>
-                <small>gramos consumidos</small>
-              </Col>
-            </Row>
-          </Card>
-
-          {/* Lista de consumidos */}
-          {consumidos.length === 0 ? (
-            <Card className="p-5 text-center shadow-sm">
-              <p className="text-muted mb-3">🍽️ No has registrado comidas</p>
-              <p className="mb-4">¡Empieza agregando tu primera comida del día!</p>
-              <Button variant="success" onClick={handleAddMeal}>+ Agregar Comida</Button>
-            </Card>
-          ) : (
-            <Card className="p-4 shadow-sm">
-              <h5 className="mb-3">Tus consumos</h5>
-              {consumidos.map((c) => {
-                const f = c.food || {};
-                return (
-                  <Row key={c.id} className="py-2 border-bottom align-items-center">
-                    <Col md={3} className="fw-bold">{f.name}</Col>
-                    <Col md={2}>{Number(f.calories || 0)} cal</Col>
-                    <Col md={2}>{Number(f.protein || 0)} g prot</Col>
-                    <Col md={2}>{Number(f.carbs || 0)} g carb</Col>
-                    <Col md={2}>{Number(f.fat || 0)} g grasa</Col>
-                    <Col md={1} className="text-end">
-                      <Button size="sm" variant="outline-warning" className="me-2" onClick={() => handleEdit(c)}>Editar</Button>
-                      <Button size="sm" variant="outline-danger" onClick={() => handleDelete(c.id)}>Eliminar</Button>
-                    </Col>
-                  </Row>
-                );
-              })}
-            </Card>
-          )}
-        </>
-      )}
-
-      {/* Modal de edición de consumido */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Editar registro de consumo</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {editConsumido && (
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label>Nombre</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={editConsumido.food?.name || ""}
-                  onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), name: e.target.value } })}
-                />
-              </Form.Group>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Calorías</Form.Label>
-                    <Form.Control
-                      type="number"
-                      value={editConsumido.food?.calories || 0}
-                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), calories: Number(e.target.value) } })}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Proteínas (g)</Form.Label>
-                    <Form.Control
-                      type="number"
-                      value={editConsumido.food?.protein || 0}
-                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), protein: Number(e.target.value) } })}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Carbohidratos (g)</Form.Label>
-                    <Form.Control
-                      type="number"
-                      value={editConsumido.food?.carbs || 0}
-                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), carbs: Number(e.target.value) } })}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Grasas (g)</Form.Label>
-                    <Form.Control
-                      type="number"
-                      value={editConsumido.food?.fat || 0}
-                      onChange={(e) => setEditConsumido({ ...editConsumido, food: { ...(editConsumido.food || {}), fat: Number(e.target.value) } })}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </Form>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
-          <Button variant="success" onClick={handleSaveEdit}>Guardar cambios</Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
-  );
-}
-
-export default Dashboard;
-
-C:\Users\Estudiantes\Desktop\nutritrack\src\Pages\Home.jsx
-import React from "react";
-import HeroSection from "../Components/HeroSection";
-import FeaturesSection from "../Components/FeaturesSection";
-import AboutSection from "../Components/AboutSection";
-import TransButton from "../Components/TransButton";
-
-function Home() {
-  return (
-    <main className="pt-5 mt-5 text-center">
-      <HeroSection />
-      <FeaturesSection />
-      <AboutSection />
-
-    </main>
-  );
-}
-
-export default Home;
-
-C:\Users\Estudiantes\Desktop\nutritrack\src\Pages\Login.jsx
-
-import React, { useState } from "react";
-import { Container, Form, Button, Alert, Card } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "../Components/UserContext";
-import { getUsuario } from "../Services/UserService";
-
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const navigate = useNavigate();
-  const { login } = useUser();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const usuarios = await getUsuario(email, password);
-
-      if (usuarios.length > 0) {
-        const usuario = usuarios[0];
-        login(usuario);
-
-        // dirigir segun tipoUsuario
-        if (usuario.tipoUsuario === "Admin") {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
-      } else {
-        setError("Correo o contraseña incorrectos.");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("Error al conectar con el servidor. Intenta nuevamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Container
-      className="d-flex align-items-center justify-content-center"
-      style={{ minHeight: "100vh" }}
-    >
-      <Card className="p-4 shadow-sm" style={{ maxWidth: "420px", width: "100%" }}>
-        <h2 className="text-success text-center mb-4">Iniciar sesión</h2>
-
-        {error && <Alert variant="danger">{error}</Alert>}
-
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3" controlId="loginEmail">
-            <Form.Label>Correo electrónico</Form.Label>
-            <Form.Control
-              type="email"
-              placeholder="correo@ejemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3" controlId="loginPassword">
-            <Form.Label>Contraseña</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="********"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={4}
-            />
-          </Form.Group>
-
-          <Button variant="success" type="submit" className="w-100" disabled={loading}>
-            {loading ? "Cargando..." : "Iniciar sesión"}
-          </Button>
-        </Form>
-      </Card>
-    </Container>
-  );
-}
-
-export default Login;
-
-C:\Users\Estudiantes\Desktop\nutritrack\src\Pages\Register.jsx
-
-import React, { useState } from "react";
-import { Container, Form, Button, Alert, Card, Row, Col, Spinner } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "../Components/UserContext";
-import { getUsuarios, agregarUsuario } from "../Services/UserService";
-
-function Register() {
-  const [formData, setFormData] = useState({
-    name: "",
-    edad: "",
-    email: "",
-    password: "",
-    peso: "",
-    altura: "",
-    genero: "",
-    condiciones: [],
-    alergias: []
-  });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const navigate = useNavigate();
-  const { login } = useUser();
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (type === "checkbox") {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: checked
-          ? [...prev[name], value]
-          : prev[name].filter((item) => item !== value)
-      }));
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    const { name, edad, email, password } = formData;
-    if (!name || !edad || !email || !password) {
-      setError("Por favor llena los campos obligatorios.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const usuarios = await getUsuarios();
-
-      if (!usuarios || !Array.isArray(usuarios)) {
-        throw new Error("No se pudo obtener la lista de usuarios.");
-      }
-
-      const yaExiste = usuarios.find((u) => u.email.toLowerCase() === email.toLowerCase());
-      if (yaExiste) {
-        setError("Este correo ya está registrado.");
-        setLoading(false);
-        return;
-      }
-
-      // aseguramos tipoUsuario = "Normal" por defecto
-      const nuevoUsuarioPayload = {
-        ...formData,
-        tipoUsuario: "Normal"
-      };
-
-      const nuevoUsuario = await agregarUsuario(nuevoUsuarioPayload);
-      if (!nuevoUsuario || !nuevoUsuario.id) {
-        throw new Error("Error al registrar el usuario.");
-      }
-
-      login(nuevoUsuario); // Guardo en contexto
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Error al registrar usuario:", error);
-      setError("Error al registrar usuario. Intenta más tarde.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
-      <Card className="p-4 shadow-sm" style={{ maxWidth: "500px", width: "100%" }}>
-        <h2 className="text-success text-center mb-3">Crear Cuenta</h2>
-        <p className="text-center text-muted">Completa tu información para personalizar tu experiencia</p>
-
-        {error && <Alert variant="danger">{error}</Alert>}
-
-        <Form onSubmit={handleSubmit}>
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Nombre</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Edad</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="edad"
-                  value={formData.edad}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Contraseña</Form.Label>
-            <Form.Control
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength={6}
-            />
-          </Form.Group>
-
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Peso (kg)</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="peso"
-                  value={formData.peso}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Altura (cm)</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="altura"
-                  value={formData.altura}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Género</Form.Label>
-            <Form.Select name="genero" value={formData.genero} onChange={handleChange}>
-              <option value="">Selecciona tu género</option>
-              <option value="Hombre">Hombre</option>
-              <option value="Mujer">Mujer</option>
-              <option value="Otro">Otro</option>
-            </Form.Select>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Condiciones Médicas (opcional)</Form.Label>
-            <div>
-              {["Diabetes", "Hipertensión", "Hipotiroidismo", "Celiaquía"].map((cond) => (
-                <Form.Check
-                  key={cond}
-                  type="checkbox"
-                  label={cond}
-                  name="condiciones"
-                  value={cond}
-                  checked={formData.condiciones.includes(cond)}
-                  onChange={handleChange}
-                />
-              ))}
-            </div>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Alergias Alimentarias (opcional)</Form.Label>
-            <div>
-              {["Gluten", "Lactosa", "Nueces", "Mariscos"].map((alergia) => (
-                <Form.Check
-                  key={alergia}
-                  type="checkbox"
-                  label={alergia}
-                  name="alergias"
-                  value={alergia}
-                  checked={formData.alergias.includes(alergia)}
-                  onChange={handleChange}
-                />
-              ))}
-            </div>
-          </Form.Group>
-
-          <Button variant="success" type="submit" className="w-100" disabled={loading}>
-            {loading ? <Spinner animation="border" size="sm" /> : "Crear Cuenta"}
-          </Button>
-        </Form>
-      </Card>
-    </Container>
-  );
-}
-
-export default Register;
-
-C:\Users\Estudiantes\Desktop\nutritrack\src\Routes\PrivateRoutes.jsx
-import React from "react";
-import { Navigate } from "react-router-dom";
-import { useUser } from "../Components/UserContext";
-
-function PrivateRoute({ children }) {
-  const { user } = useUser();
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-}
-
-export default PrivateRoute;
-
-C:\Users\Estudiantes\Desktop\nutritrack\src\Routes\Routing.jsx
-
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AddMeal from "../Pages/AddMeal";
-import Home from "../Pages/Home";
-import Register from "../Pages/Register";
-import Login from "../Pages/Login";
-import Dashboard from "../Pages/DashBoard";
-import AdminPanel from "../Pages/AdminPanel";
-import PrivateRoute from "./PrivateRoutes";
-import Header from "../Components/Header";
-
-function Routing() {
-  return (
-    <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-
-        {/* Rutas protegidas */}
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/add-meal"
-          element={
-            <PrivateRoute>
-              <AddMeal />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Admin route */}
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute>
-              <AdminPanel />
-            </PrivateRoute>
-          }
-        />
-
-        {/* ruta catch-all 404 */}
-        <Route path="*" element={<h2>Página no encontrada</h2>} />
-      </Routes>
-    </Router>
-  );
-}
-
-export default Routing;
-
-C:\Users\Estudiantes\Desktop\nutritrack\src\Services\ConsumidosService.jsx
-
-export async function getConsumidos() {
-  try {
-    const response = await fetch("http://localhost:3001/consumidos", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" }
-    });
-    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error al recuperar consumidos:", error);
-    throw error;
-  }
-}
-
-export async function getConsumidosByUser(userId) {
-  try {
-    const response = await fetch(`http://localhost:3001/consumidos?userId=${encodeURIComponent(userId)}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" }
-    });
-    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error al recuperar consumidos por usuario:", error);
-    throw error;
-  }
-}
-
-export async function getConsumidoById(id) {
-  try {
-    const response = await fetch(`http://localhost:3001/consumidos/${id}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" }
-    });
-    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error al obtener consumido:", error);
-    throw error;
-  }
-}
-
-export async function agregarConsumido(consumidoObj) {
-  try {
-    const response = await fetch("http://localhost:3001/consumidos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(consumidoObj)
-    });
-    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error al agregar consumido:", error);
-    throw error;
-  }
-}
-
-export async function actualizarConsumido(consumidoObj) {
-  try {
-    const response = await fetch(`http://localhost:3001/consumidos/${consumidoObj.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(consumidoObj)
-    });
-    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    console.error("Error al actualizar consumido:", error);
-    throw error;
-  }
-}
-
-export async function eliminarConsumido(id) {
-  try {
-    const response = await fetch(`http://localhost:3001/consumidos/${id}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" }
-    });
-    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-    
-  } catch (error) {
-    console.error("Error al eliminar consumido:", error);
-    throw error;
-  }
-}
-
-C:\Users\Estudiantes\Desktop\nutritrack\src\Services\FoodServices.jsx
-/* Obtengo todos los alimentos */
-export async function getFoods() {
-  try {
-    const response = await fetch("http://localhost:3001/foods", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" }
-    });
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Error al recuperar foods:", error);
-    throw error;
-  }
-}
-
-/* Obtengo alimento por id */
-export async function getFoodById(id) {
-  try {
-    const response = await fetch(`http://localhost:3001/foods/${id}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" }
-    });
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Error al obtener food:", error);
-    throw error;
-  }
-}
-
-/* Agrego nuevo alimento */
-export async function agregarFood(foodObj) {
-  try {
-    const response = await fetch("http://localhost:3001/foods", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(foodObj)
-    });
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Error al agregar food:", error);
-    throw error;
-  }
-}
-
-/* Actualizo alimento */
-export async function actualizarFood(foodObj) {
-  try {
-    const response = await fetch(`http://localhost:3001/foods/${foodObj.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(foodObj)
-    });
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Error al actualizar food:", error);
-    throw error;
-  }
-}
-
-/* Elimino alimento por id */
-export async function eliminarFood(id) {
-  try {
-    const response = await fetch(`http://localhost:3001/foods/${id}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" }
-    });
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
-    }
-  } catch (error) {
-    console.error("Error al eliminar food:", error);
-    throw error;
-  }
-}
-
-C:\Users\Estudiantes\Desktop\nutritrack\src\Services\UserService.jsx
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\Components\UserContext.jsx
 
 
 export async function getUsuarios() {
@@ -1593,7 +373,7 @@ export async function eliminarUsuario(id) {
   }
 }
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\Styles\AboutSection.css
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\Styles\AboutSection.css
 
 @media (max-width: 576px) {
   .about-section h5 {
@@ -1609,7 +389,7 @@ C:\Users\Estudiantes\Desktop\nutritrack\src\Styles\AboutSection.css
   }
 }
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\Styles\DashBoard.css
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\Styles\DashBoard.css
 .dashboard-wrapper {
   min-height: 100vh;
   background-color: #f8fdf8;
@@ -1640,7 +420,7 @@ C:\Users\Estudiantes\Desktop\nutritrack\src\Styles\DashBoard.css
   }
 }
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\App.css
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\App.css
 body {
   font-family: "Poppins", "Segoe UI", Roboto, Arial, sans-serif;
   background: linear-gradient(180deg, #f9fafb 0%, #eef9f3 100%);
@@ -1723,7 +503,7 @@ footer a:hover {
   text-decoration: underline;
 }
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\App.jsx
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\App.jsx
 import React from "react";
 import Routing from "./Routes/Routing";
 import Footer from "./Components/Footer";
@@ -1740,7 +520,7 @@ function App() {
 
 export default App;
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\index.css
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\index.css
 body {
   margin: 0;
   min-width: 320px;
@@ -1799,7 +579,7 @@ button:focus-visible {
   }
 }
 
-C:\Users\Estudiantes\Desktop\nutritrack\src\main.jsx
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\src\main.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
@@ -1814,7 +594,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   </React.StrictMode>
 );
 
-C:\Users\Estudiantes\Desktop\nutritrack\.gitignore
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\.gitignore
 # Logs
 logs
 *.log
@@ -1840,8 +620,279 @@ dist-ssr
 *.sln
 *.sw?
 
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\db.json
+{
+  "usuarios": [
+    {
+      "id": "1",
+      "name": "Carlos Pérez",
+      "edad": 28,
+      "email": "carlos@nutri.com",
+      "password": "123456",
+      "peso": 72,
+      "altura": 175,
+      "genero": "Hombre",
+      "condiciones": [
+        "Hipertensión"
+      ],
+      "alergias": [
+        "Gluten"
+      ],
+      "tipoUsuario": "Admin"
+    },
+    {
+      "id": "2",
+      "name": "María López",
+      "edad": 34,
+      "email": "maria@nutri.com",
+      "password": "654321",
+      "peso": 60,
+      "altura": 162,
+      "genero": "Mujer",
+      "condiciones": [
+        "Diabetes"
+      ],
+      "alergias": [
+        "Lactosa"
+      ],
+      "tipoUsuario": "Normal"
+    },
+    {
+      "id": "3",
+      "name": "Javier García",
+      "edad": 40,
+      "email": "javier@nutri.com",
+      "password": "nutri2024",
+      "peso": 80,
+      "altura": 178,
+      "genero": "Hombre",
+      "condiciones": [
+        "Hipotiroidismo"
+      ],
+      "alergias": [
+        "Nueces",
+        "Mariscos"
+      ],
+      "tipoUsuario": "Normal"
+    },
+    {
+      "id": "4",
+      "name": "Lucía Fernández",
+      "edad": 25,
+      "email": "lucia@nutri.com",
+      "password": "healthy123",
+      "peso": 55,
+      "altura": 160,
+      "genero": "Mujer",
+      "condiciones": [],
+      "alergias": [],
+      "tipoUsuario": "Normal"
+    },
+    {
+      "id": "5",
+      "name": "Andrés Torres",
+      "edad": 31,
+      "email": "andres@nutri.com",
+      "password": "planfit",
+      "peso": 68,
+      "altura": 172,
+      "genero": "Hombre",
+      "condiciones": [
+        "Celiaquía"
+      ],
+      "alergias": [
+        "Gluten"
+      ],
+      "tipoUsuario": "Normal"
+    }
+  ],
+  "foods": [
+    {
+      "id": "9649",
+      "name": "Pechuga de pollo a la plancha",
+      "calories": 165,
+      "protein": 31,
+      "carbs": 0,
+      "fat": 3.6
+    },
+    {
+      "id": "da65",
+      "name": "Arroz blanco cocido",
+      "calories": 130,
+      "protein": 2.4,
+      "carbs": 28,
+      "fat": 0.3
+    },
+    {
+      "id": "3317",
+      "name": "Lentejas cocidas",
+      "calories": 116,
+      "protein": 9,
+      "carbs": 20,
+      "fat": 0.4
+    },
+    {
+      "id": "44c4",
+      "name": "Carne de res magra (filete)",
+      "calories": 217,
+      "protein": 26,
+      "carbs": 0,
+      "fat": 12
+    },
+    {
+      "id": "00b4",
+      "name": "Salmón al horno",
+      "calories": 208,
+      "protein": 20,
+      "carbs": 0,
+      "fat": 13
+    },
+    {
+      "id": "b5a6",
+      "name": "Huevo",
+      "calories": 143,
+      "protein": 48,
+      "carbs": 1,
+      "fat": 9.5
+    },
+    {
+      "id": "cb05",
+      "name": "Brócoli al vapor",
+      "calories": 35,
+      "protein": 2.8,
+      "carbs": 7,
+      "fat": 0.4
+    },
+    {
+      "id": "1995",
+      "name": "Banana",
+      "calories": 89,
+      "protein": 1.1,
+      "carbs": 23,
+      "fat": 0.3
+    },
+    {
+      "id": "b29a",
+      "name": "Avena integral cruda",
+      "calories": 389,
+      "protein": 1.1,
+      "carbs": 23,
+      "fat": 0.3
+    },
+    {
+      "id": "4e4c",
+      "name": "Avena integral cruda",
+      "calories": 389,
+      "protein": 16.9,
+      "carbs": 66,
+      "fat": 6.9
+    },
+    {
+      "id": "5cf5",
+      "name": "Yogur natural sin grasa",
+      "calories": 59,
+      "protein": 10,
+      "carbs": 3.6,
+      "fat": 0.4
+    },
+    {
+      "id": "fb82",
+      "name": "Manzana",
+      "calories": 52,
+      "protein": 0.3,
+      "carbs": 14,
+      "fat": 0.2
+    },
+    {
+      "id": "22b6",
+      "name": "Pechuga de pavo sin piel",
+      "calories": 135,
+      "protein": 29,
+      "carbs": 0,
+      "fat": 1
+    },
+    {
+      "id": "5341",
+      "name": "Quinoa cocida",
+      "calories": 120,
+      "protein": 4.4,
+      "carbs": 21.3,
+      "fat": 1.9
+    },
+    {
+      "id": "2c0f",
+      "name": "Papa Hervida",
+      "calories": 77,
+      "protein": 2,
+      "carbs": 17,
+      "fat": 0.1
+    },
+    {
+      "id": "3f10",
+      "name": "Tofu firme",
+      "calories": 76,
+      "protein": 8,
+      "carbs": 1.9,
+      "fat": 4.8
+    },
+    {
+      "id": "94e2",
+      "name": "Atún en agua (lata)",
+      "calories": 116,
+      "protein": 26,
+      "carbs": 0,
+      "fat": 1
+    },
+    {
+      "id": "89f3",
+      "name": "Pan integral (1 rebanada, 30g)",
+      "calories": 69,
+      "protein": 3.6,
+      "carbs": 12,
+      "fat": 1
+    },
+    {
+      "id": "c9eb",
+      "name": "Frijoles",
+      "calories": 151,
+      "protein": 18.2,
+      "carbs": 50.4,
+      "fat": 1
+    }
+  ],
+  "consumidos": [
+    {
+      "id": "8cf0",
+      "userId": "4",
+      "foodId": "73eb",
+      "food": {
+        "id": "73eb",
+        "name": "prueba2",
+        "calories": 3,
+        "protein": 5,
+        "carbs": 25,
+        "fat": 19
+      },
+      "date": "2025-10-01T23:31:49.775Z"
+    },
+    {
+      "id": "7620",
+      "userId": "4",
+      "foodId": "5341",
+      "food": {
+        "id": "5341",
+        "name": "Quinoa cocida",
+        "calories": 120,
+        "protein": 4.4,
+        "carbs": 21.3,
+        "fat": 1.9
+      },
+      "date": "2025-10-01T23:43:57.530Z"
+    }
+  ]
+}
 
-C:\Users\Estudiantes\Desktop\nutritrack\index.html
+C:\Users\Estudiantes\Desktop\Nutri-Track-React-\nutritrack\index.html
 <!doctype html>
 <html lang="es">
   <head>

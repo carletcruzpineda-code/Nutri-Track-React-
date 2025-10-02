@@ -78,7 +78,7 @@ export async function eliminarConsumido(id) {
       headers: { "Content-Type": "application/json" }
     });
     if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-    // no body expected
+    
   } catch (error) {
     console.error("Error al eliminar consumido:", error);
     throw error;
